@@ -1,0 +1,22 @@
+{
+    "name": "damian/php-translation-manager-laravel",
+    "authors": [
+        {
+            "name": "Damian Kilian",
+            "email": "kilianpoczta@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PhpTranslationManagerLaravel\\": "src/"
+        }
+    },
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "PhpTranslationManagerLaravel\\PhpTranslationManagerLaravelServiceProvider"
+            ]
+        }
+    }
+}
