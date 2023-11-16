@@ -10,19 +10,19 @@ class PhpTranslationManagerServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/../config/phptranslationmanager.php' => config_path('phptranslationmanager.php'),
-        ], 'phptranslationmanager-config');
+            __DIR__ . '/../config/phptranslationmanagerlaravel.php' => config_path('phptranslationmanagerlaravel.php'),
+        ], 'phptranslationmanagerlaravel-config');
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'phptranslationmanager');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'php-translation-manager-laravel');
     }
 
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/phptranslationmanager.php',
-            'phptranslationmanager'
+            __DIR__ . '/../config/phptranslationmanagerlaravel.php',
+            'phptranslationmanagerlaravel'
         );
     }
 }
