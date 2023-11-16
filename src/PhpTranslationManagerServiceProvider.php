@@ -5,7 +5,7 @@ namespace PhpTranslationManagerLaravel;
 use Illuminate\Support\ServiceProvider;
 use PhpTranslationManager\PhpTranslationManager;
 
-class PhpTranslationManagerLaravelServiceProvider extends ServiceProvider
+class PhpTranslationManagerServiceProvider extends ServiceProvider
 {
     public function boot()
     {
@@ -14,6 +14,8 @@ class PhpTranslationManagerLaravelServiceProvider extends ServiceProvider
         ], 'phptranslationmanager-config');
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'phptranslationmanager');
     }
 
     public function register()
