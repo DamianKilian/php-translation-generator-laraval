@@ -18,7 +18,8 @@ const app = createApp({});
 
 import ExampleComponent from './components/ExampleComponent.vue';
 app.component('example-component', ExampleComponent);
-
+import PhpTranslationManager from './components/PhpTranslationManager.vue';
+app.component('php-translation-manager', PhpTranslationManager);
 
 
 /**
