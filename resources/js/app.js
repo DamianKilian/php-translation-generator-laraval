@@ -42,5 +42,3 @@ app.component('php-translation-manager', PhpTranslationManager);
  */
 
 app.mount('#app');
-
-console.debug(1);//mmmyyy

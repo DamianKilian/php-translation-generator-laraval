@@ -1,0 +1,26 @@
+.side-panel {
+    .settings {
+        width: 0;
+        transition: width 50ms ease;
+        .sticky-top {
+            overflow-x: hidden;
+        }
+    }
+    &.open {
+        .settings {
+            width: 25vw;
+        }
+        .sticky-top {
+            height: 100vh;
+            padding-bottom: 15vh;
+        }
+    }
+    .btn-svg {
+        margin-bottom: 10px;
+        &:hover {
+            svg {
+                filter: invert(60%);
+            }
+        }
+    }
+}
