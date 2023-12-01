@@ -14,7 +14,7 @@
                 <div :class="{ open: sidePanelOpen }" class="side-panel d-flex">
                     <div class="settings flex-grow-1">
                         <div class="sticky-top">
-                            <h2 class="text-white bg-secondary text-center">{{ langCode }}</h2>
+                            <h2 class="text-white bg-dark text-center">{{ langCode }}</h2>
                         </div>
                     </div>
                     <div class="btns px-3">
@@ -52,10 +52,12 @@
                     <form>
                         <div v-for="(val, key) in transFileContent" class="row g-3 mb-3">
                             <div class="col">
-                                <textarea class="form-control" rows="3">{{ key }}</textarea>
+                                <textarea class="form-control" rows="3" :value="key"
+                                    @input="e => translationModified(e, key, 'key')"></textarea>
                             </div>
                             <div class="col">
-                                <textarea class="form-control" rows="3">{{ val }}</textarea>
+                                <textarea class="form-control" rows="3" :value="val['val']"
+                                    @input="e => translationModified(e, key, 'val')"></textarea>
                             </div>
                         </div>
                     </form>
@@ -68,20 +70,43 @@
 <script>
 export default {
     props: {
-        transFilesContents: Object,
+        transFilesContentsProp: Object,
     },
     data() {
         return {
             sidePanelOpen: false,
-            confirmSaveOpen: false
+            confirmSaveOpen: false,
+            transFilesContents: this.getTransFilesContents(),
         }
     },
     methods: {
+        getTransFilesContents: function () {
+            var transFilesContents = {};
+            var meta = {
+                new: false,
+                modified: false,
+                deleted: false,
+            };
+            for (const prop in this.transFilesContentsProp) {
+                transFilesContents[prop] = {};
+                for (const prop2 in this.transFilesContentsProp[prop]) {
+                    transFilesContents[prop][prop2] = {
+                        meta: meta,
+                        val: this.transFilesContentsProp[prop][prop2]
+                    };
+                }
+            }
+            return transFilesContents;
+        },
         confirmSaveClose: function (e) {
             if (!e.target.closest(".save-wrapper")) {
                 this.confirmSaveOpen = false;
             }
         },
+        translationModified: function (e) {
+            console.debug(e.target.value);//mmmyyy
+        },
+
     },
     mounted() {
     }

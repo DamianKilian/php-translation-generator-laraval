@@ -9,6 +9,7 @@
     &.open {
         .settings {
             width: 25vw;
+            max-width: 250px;
         }
         .sticky-top {
             height: 100vh;

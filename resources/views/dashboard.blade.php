@@ -8,7 +8,7 @@
 
 <body>
     <div id="app">
-        <php-translation-manager :trans-files-contents='@json($transFilesContents)'></php-translation-manager>
+        <php-translation-manager :trans-files-contents-prop='@json($transFilesContents)'></php-translation-manager>
     </div>
     <script src="{{ route('js') }}"></script>
 </body>

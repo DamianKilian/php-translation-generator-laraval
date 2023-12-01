@@ -11985,6 +11985,7 @@ textarea.form-control-lg {
 }
 .side-panel.open .settings {
   width: 25vw;
+  max-width: 250px;
 }
 .side-panel.open .sticky-top {
   height: 100vh;
