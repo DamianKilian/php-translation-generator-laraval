@@ -11996,3 +11996,31 @@ textarea.form-control-lg {
 .side-panel .btn-svg:hover svg {
   filter: invert(60%);
 }
+
+.btns .save-wrapper {
+  position: relative;
+}
+.btns .save-wrapper .confirm-save {
+  display: none;
+  opacity: 0 50ms ease;
+  transition: opacity;
+  position: absolute;
+  top: 0;
+  margin: auto;
+  left: 64px;
+  width: 200px;
+  height: 64px;
+}
+.btns .save-wrapper .confirm-save button {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: 33px;
+  right: 0;
+  left: 0;
+}
+.btns .save-wrapper .confirm-save.open {
+  display: block;
+  opacity: 1;
+}
