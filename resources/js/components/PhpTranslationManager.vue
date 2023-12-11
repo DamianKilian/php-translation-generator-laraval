@@ -3,7 +3,7 @@
         <div class="nav nav-tabs" id="nav-tab">
             <button v-for="(langCode, index) in Object.keys(transFilesContents)" class="nav-link"
                 :class="{ 'active': index === 0 }" :set="code = langCode.replace('.json', '')" :id="'nav-' + code + '-tab'"
-                data-bs-toggle="tab" :data-bs-target="'#nav-' + code">{{ langCode }}</button>
+                data-bs-toggle="tab" :data-bs-target="'#nav-' + code" :data-lang-code="langCode">{{ langCode }}</button>
         </div>
     </nav>
     <div @click="confirmSaveClose" class="tab-content" id="nav-tabContent">
@@ -50,14 +50,16 @@
                 </div>
                 <div class="bg-light rounded flex-grow-1">
                     <form>
-                        <div v-for="(val, key) in transFileContent" class="row g-3 mb-3">
-                            <div class="col">
-                                <textarea class="form-control" rows="3" :value="key"
-                                    @input="e => translationModified(e, key, 'key')"></textarea>
+                        <div v-for="(val, key) in transFileContent" class="row g-3" :key="key">
+                            <div class="col p-2"
+                                :class="{ 'bg-warning': val.meta.modified.key, 'bg-danger': '' !== val.meta.error }">
+                                {{ val.meta.error }}
+                                <textarea class="form-control key-textarea" rows="3" :value="val['key']"
+                                    @input="e => { translationModified(e, key, 'key') }"></textarea>
                             </div>
-                            <div class="col">
-                                <textarea class="form-control" rows="3" :value="val['val']"
-                                    @input="e => translationModified(e, key, 'val')"></textarea>
+                            <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
+                                <textarea class="form-control val-textarea" rows="3" :value="val['val']"
+                                    @input="e => { translationModified(e, key, 'val') }"></textarea>
                             </div>
                         </div>
                     </form>
@@ -74,6 +76,7 @@ export default {
     },
     data() {
         return {
+            langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
             transFilesContents: this.getTransFilesContents(),
@@ -82,17 +85,21 @@ export default {
     methods: {
         getTransFilesContents: function () {
             var transFilesContents = {};
-            var meta = {
-                new: false,
-                modified: false,
-                deleted: false,
-            };
             for (const prop in this.transFilesContentsProp) {
                 transFilesContents[prop] = {};
                 for (const prop2 in this.transFilesContentsProp[prop]) {
+                    var meta = {
+                        new: false,
+                        deleted: false,
+                        modified: { key: false, val: false },
+                        orginalVal: this.transFilesContentsProp[prop][prop2],
+                        orginalKey: prop2,
+                        error: '',
+                    };
                     transFilesContents[prop][prop2] = {
                         meta: meta,
-                        val: this.transFilesContentsProp[prop][prop2]
+                        val: this.transFilesContentsProp[prop][prop2],
+                        key: prop2
                     };
                 }
             }
@@ -103,12 +110,61 @@ export default {
                 this.confirmSaveOpen = false;
             }
         },
-        translationModified: function (e) {
-            console.debug(e.target.value);//mmmyyy
+        translationModified: _.debounce(function (e, key, type) {
+            var keyRecord = this.transFilesContents[this.langCode][key];
+            if ('key' === type) {
+                var newKey = e.target.value.trim();
+                if (newKey === keyRecord.key) {
+                    return;
+                }
+                this.changeKey(keyRecord, newKey);
+                this.checkDuplicateKey(keyRecord, newKey);
+            } else if ('val' === type) {
+                var newVal = e.target.value.trim();
+                if (newVal === keyRecord.val) {
+                    return;
+                }
+                this.changeVal(keyRecord, newVal);
+            }
+        }, 1000),
+        changeVal: function (keyRecord, newVal) {
+            keyRecord.val = newVal;
+            keyRecord.meta.modified.val = (newVal !== keyRecord.meta.orginalVal);
+        },
+        changeKey: function (keyRecord, newKey) {
+            keyRecord.key = newKey;
+            keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
+        },
+        checkDuplicateKey: function (keyRecord, newKey) {
+            var keyTextareas = document.querySelectorAll('.active .key-textarea');
+            var matches = 0;
+            for (const keyTextarea of keyTextareas) {
+                if (newKey === keyTextarea.value) {
+                    if (1 < ++matches) {
+                        keyRecord.meta.error = 'duplicate key';
+                        return;
+                    }
+                }
+            }
+            keyRecord.meta.error = '';
+        },
+        gettingLangCodeFromTabs: function () {
+            this.langCode = document.querySelector('.nav-tabs .active').dataset.langCode;
+            const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabEls.forEach((tabEl) => {
+                tabEl.addEventListener('shown.bs.tab', e => {
+                    this.langCode = e.target.dataset.langCode;
+                });
+            });
         },
 
     },
     mounted() {
+        this.gettingLangCodeFromTabs();
+        // console.debug(this.transFilesContents);//mmmyyy
+    },
+    updated() {
+        // console.debug('updated');//mmmyyy
     }
 }
 </script>
