@@ -11991,11 +11991,18 @@ textarea.form-control-lg {
   height: 100vh;
   padding-bottom: 15vh;
 }
-.side-panel .btn-svg {
+.side-panel .btn-icon {
+  cursor: pointer;
   margin-bottom: 10px;
 }
-.side-panel .btn-svg:hover svg {
+.side-panel .btn-icon:hover svg,
+.side-panel .btn-icon:hover span {
   filter: invert(60%);
+}
+.side-panel .btn-icon span {
+  font-size: 70px;
+  line-height: 60px;
+  color: red;
 }
 
 .btns .save-wrapper {

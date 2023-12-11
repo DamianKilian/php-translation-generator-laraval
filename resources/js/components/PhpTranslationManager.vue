@@ -19,7 +19,7 @@
                     </div>
                     <div class="btns px-3">
                         <div class="sticky-top">
-                            <div @click="sidePanelOpen = !sidePanelOpen" class="openSettings btn-svg">
+                            <div @click="sidePanelOpen = !sidePanelOpen" class="openSettings btn-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
                                     fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
                                     stroke-linejoin="round">
@@ -30,7 +30,7 @@
                                 </svg>
                             </div>
                             <div class="save-wrapper">
-                                <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-svg">
+                                <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
                                         fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
                                         stroke-linejoin="round">
@@ -44,6 +44,9 @@
                                         Save for "{{ langCode }}"
                                     </button>
                                 </div>
+                            </div>
+                            <div class="error btn-icon">
+                                <span>&#9888;</span>
                             </div>
                         </div>
                     </div>
@@ -76,6 +79,7 @@ export default {
     },
     data() {
         return {
+            duplicateKeyRecords: {},
             langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
@@ -118,7 +122,7 @@ export default {
                     return;
                 }
                 this.changeKey(keyRecord, newKey);
-                this.checkDuplicateKey(keyRecord, newKey);
+                this.checkDuplicateKey(key, newKey);
             } else if ('val' === type) {
                 var newVal = e.target.value.trim();
                 if (newVal === keyRecord.val) {
@@ -126,7 +130,18 @@ export default {
                 }
                 this.changeVal(keyRecord, newVal);
             }
-        }, 1000),
+            this.reCheckDuplicateKeys();
+        }, 500),
+        reCheckDuplicateKeys: function () {
+            if (Object.keys(this.duplicateKeyRecords).length === 0) {
+                return;
+            }
+            for (const key in this.duplicateKeyRecords) {
+                var keyRecord = this.duplicateKeyRecords[key];
+                delete this.duplicateKeyRecords[key];
+                this.checkDuplicateKey(key, keyRecord.key);
+            }
+        },
         changeVal: function (keyRecord, newVal) {
             keyRecord.val = newVal;
             keyRecord.meta.modified.val = (newVal !== keyRecord.meta.orginalVal);
@@ -135,13 +150,15 @@ export default {
             keyRecord.key = newKey;
             keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
         },
-        checkDuplicateKey: function (keyRecord, newKey) {
+        checkDuplicateKey: function (key, newKey) {
+            var keyRecord = this.transFilesContents[this.langCode][key];
             var keyTextareas = document.querySelectorAll('.active .key-textarea');
             var matches = 0;
             for (const keyTextarea of keyTextareas) {
                 if (newKey === keyTextarea.value) {
                     if (1 < ++matches) {
                         keyRecord.meta.error = 'duplicate key';
+                        this.duplicateKeyRecords[key] = keyRecord;
                         return;
                     }
                 }
@@ -164,7 +181,8 @@ export default {
         // console.debug(this.transFilesContents);//mmmyyy
     },
     updated() {
-        // console.debug('updated');//mmmyyy
+        console.debug('updated');//mmmyyy
+        // console.debug(this.duplicateKeyRecords);//mmmyyy
     }
 }
 </script>

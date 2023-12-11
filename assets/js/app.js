@@ -19993,6 +19993,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   data: function data() {
     return {
+      duplicateKeyRecords: {},
       langCode: null,
       sidePanelOpen: false,
       confirmSaveOpen: false,
@@ -20038,7 +20039,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           return;
         }
         this.changeKey(keyRecord, newKey);
-        this.checkDuplicateKey(keyRecord, newKey);
+        this.checkDuplicateKey(key, newKey);
       } else if ('val' === type) {
         var newVal = e.target.value.trim();
         if (newVal === keyRecord.val) {
@@ -20046,7 +20047,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         }
         this.changeVal(keyRecord, newVal);
       }
-    }, 1000),
+      this.reCheckDuplicateKeys();
+    }, 500),
+    reCheckDuplicateKeys: function reCheckDuplicateKeys() {
+      if (Object.keys(this.duplicateKeyRecords).length === 0) {
+        return;
+      }
+      for (var key in this.duplicateKeyRecords) {
+        var keyRecord = this.duplicateKeyRecords[key];
+        delete this.duplicateKeyRecords[key];
+        this.checkDuplicateKey(key, keyRecord.key);
+      }
+    },
     changeVal: function changeVal(keyRecord, newVal) {
       keyRecord.val = newVal;
       keyRecord.meta.modified.val = newVal !== keyRecord.meta.orginalVal;
@@ -20055,7 +20067,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       keyRecord.key = newKey;
       keyRecord.meta.modified.key = newKey !== keyRecord.meta.orginalKey;
     },
-    checkDuplicateKey: function checkDuplicateKey(keyRecord, newKey) {
+    checkDuplicateKey: function checkDuplicateKey(key, newKey) {
+      var keyRecord = this.transFilesContents[this.langCode][key];
       var keyTextareas = document.querySelectorAll('.active .key-textarea');
       var matches = 0;
       var _iterator = _createForOfIteratorHelper(keyTextareas),
@@ -20066,6 +20079,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           if (newKey === keyTextarea.value) {
             if (1 < ++matches) {
               keyRecord.meta.error = 'duplicate key';
+              this.duplicateKeyRecords[key] = keyRecord;
               return;
             }
           }
@@ -20093,7 +20107,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     // console.debug(this.transFilesContents);//mmmyyy
   },
   updated: function updated() {
-    // console.debug('updated');//mmmyyy
+    console.debug('updated'); //mmmyyy
+    // console.debug(this.duplicateKeyRecords);//mmmyyy
   }
 });
 
@@ -20203,11 +20218,14 @@ var _hoisted_15 = {
   type: "button",
   "class": "btn btn-primary float-end"
 };
-var _hoisted_16 = {
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "error btn-icon"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "⚠")], -1 /* HOISTED */);
+var _hoisted_17 = {
   "class": "bg-light rounded flex-grow-1"
 };
-var _hoisted_17 = ["value", "onInput"];
 var _hoisted_18 = ["value", "onInput"];
+var _hoisted_19 = ["value", "onInput"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
@@ -20240,17 +20258,17 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       onClick: _cache[0] || (_cache[0] = function ($event) {
         return $data.sidePanelOpen = !$data.sidePanelOpen;
       }),
-      "class": "openSettings btn-svg"
+      "class": "openSettings btn-icon"
     }, [].concat(_hoisted_11)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[1] || (_cache[1] = function ($event) {
         return $data.confirmSaveOpen = !$data.confirmSaveOpen;
       }),
-      "class": "save btn-svg"
+      "class": "save btn-icon"
     }, [].concat(_hoisted_14)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
         open: $data.confirmSaveOpen
       }, "confirm-save text-bg-dark p-2"])
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_15, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)])])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, key) {
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_15, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)]), _hoisted_16])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, key) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         "class": "row g-3",
         key: key
@@ -20266,7 +20284,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, key, 'key');
         }
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_17)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_18)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
@@ -20277,7 +20295,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, key, 'val');
         }
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_18)], 2 /* CLASS */)]);
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_19)], 2 /* CLASS */)]);
     }), 128 /* KEYED_FRAGMENT */))])])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */))])], 64 /* STABLE_FRAGMENT */);
 }
