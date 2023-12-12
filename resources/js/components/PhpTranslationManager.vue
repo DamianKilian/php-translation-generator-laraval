@@ -45,7 +45,8 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="error btn-icon">
+                            <div @click="filterErrors" class="error btn-icon"
+                                v-if="Object.keys(duplicateKeyRecords).length !== 0">
                                 <span>&#9888;</span>
                             </div>
                         </div>
@@ -53,7 +54,8 @@
                 </div>
                 <div class="bg-light rounded flex-grow-1">
                     <form>
-                        <div v-for="(val, key) in transFileContent" class="row g-3" :key="key">
+                        <div v-for="(val, key) in transFileContent" class="row g-3" :class="{ 'd-none': !val.meta.visible }"
+                            :key="key">
                             <div class="col p-2"
                                 :class="{ 'bg-warning': val.meta.modified.key, 'bg-danger': '' !== val.meta.error }">
                                 {{ val.meta.error }}
@@ -73,6 +75,8 @@
 </template>
 
 <script>
+import { filterErrors } from './phpTranslationManager/filters.js'
+
 export default {
     props: {
         transFilesContentsProp: Object,
@@ -87,12 +91,14 @@ export default {
         }
     },
     methods: {
+        filterErrors,
         getTransFilesContents: function () {
             var transFilesContents = {};
             for (const prop in this.transFilesContentsProp) {
                 transFilesContents[prop] = {};
                 for (const prop2 in this.transFilesContentsProp[prop]) {
                     var meta = {
+                        visible: true,
                         new: false,
                         deleted: false,
                         modified: { key: false, val: false },
