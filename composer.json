@@ -11,12 +11,16 @@
             "PhpTranslationManagerLaravel\\": "src/"
         }
     },
-    "require": {},
+    "require": {
+        "illuminate/support": ">=6.0"
+    },
     "extra": {
         "laravel": {
             "providers": [
-                "PhpTranslationManagerLaravel\\PhpTranslationManagerLaravelServiceProvider"
+                "PhpTranslationManagerLaravel\\PhpTranslationManagerServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": false
 }
