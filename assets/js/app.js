@@ -19991,7 +19991,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
-    transFilesContentsProp: Object
+    transFilesContentsProp: Object,
+    saveTransFilesUrl: String
   },
   data: function data() {
     return {
@@ -20004,11 +20005,28 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   methods: {
     filterErrors: _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__.filterErrors,
-    getTransFilesContents: function getTransFilesContents() {
-      var transFilesContents = {};
-      for (var prop in this.transFilesContentsProp) {
+    saveTransFiles: function saveTransFiles() {
+      var _this = this;
+      var data = {};
+      data[this.langCode] = this.transFilesContents[this.langCode];
+      axios.post(this.saveTransFilesUrl, {
+        trans: data
+      }).then(function (response) {
+        _this.getTransFilesContents(response.data.transFilesContents);
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    getTransFilesContents: function getTransFilesContents(data) {
+      if (this.transFilesContents) {
+        var transFilesContents = this.transFilesContents;
+      } else {
+        var transFilesContents = {};
+        data = this.transFilesContentsProp;
+      }
+      for (var prop in data) {
         transFilesContents[prop] = {};
-        for (var prop2 in this.transFilesContentsProp[prop]) {
+        for (var prop2 in data[prop]) {
           var meta = {
             visible: true,
             "new": false,
@@ -20017,13 +20035,13 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               key: false,
               val: false
             },
-            orginalVal: this.transFilesContentsProp[prop][prop2],
+            orginalVal: data[prop][prop2],
             orginalKey: prop2,
             error: ''
           };
           transFilesContents[prop][prop2] = {
             meta: meta,
-            val: this.transFilesContentsProp[prop][prop2],
+            val: data[prop][prop2],
             key: prop2
           };
         }
@@ -20096,12 +20114,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       keyRecord.meta.error = '';
     },
     gettingLangCodeFromTabs: function gettingLangCodeFromTabs() {
-      var _this = this;
+      var _this2 = this;
       this.langCode = document.querySelector('.nav-tabs .active').dataset.langCode;
       var tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
       tabEls.forEach(function (tabEl) {
         tabEl.addEventListener('shown.bs.tab', function (e) {
-          _this.langCode = e.target.dataset.langCode;
+          _this2.langCode = e.target.dataset.langCode;
         });
       });
     }
@@ -20218,14 +20236,13 @@ var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   points: "7 3 7 8 15 8"
 })], -1 /* HOISTED */);
 var _hoisted_14 = [_hoisted_13];
-var _hoisted_15 = {
-  type: "button",
-  "class": "btn btn-primary float-end"
-};
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "⚠", -1 /* HOISTED */);
-var _hoisted_17 = [_hoisted_16];
-var _hoisted_18 = {
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "⚠", -1 /* HOISTED */);
+var _hoisted_16 = [_hoisted_15];
+var _hoisted_17 = {
   "class": "bg-light rounded flex-grow-1"
+};
+var _hoisted_18 = {
+  autocomplete: "off"
 };
 var _hoisted_19 = ["value", "onInput"];
 var _hoisted_20 = ["value", "onInput"];
@@ -20242,7 +20259,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-lang-code": langCode
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode), 11 /* TEXT, CLASS, PROPS */, _hoisted_2);
   }), 256 /* UNKEYED_FRAGMENT */))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[3] || (_cache[3] = function () {
+    onClick: _cache[4] || (_cache[4] = function () {
       return $options.confirmSaveClose && $options.confirmSaveClose.apply($options, arguments);
     }),
     "class": "tab-content",
@@ -20271,13 +20288,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
         open: $data.confirmSaveOpen
       }, "confirm-save text-bg-dark p-2"])
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", _hoisted_15, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)]), Object.keys($data.duplicateKeyRecords).length !== 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-      key: 0,
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       onClick: _cache[2] || (_cache[2] = function () {
+        return $options.saveTransFiles && $options.saveTransFiles.apply($options, arguments);
+      }),
+      type: "button",
+      "class": "btn btn-primary float-end"
+    }, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)]), Object.keys($data.duplicateKeyRecords).length !== 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      key: 0,
+      onClick: _cache[3] || (_cache[3] = function () {
         return $options.filterErrors && $options.filterErrors.apply($options, arguments);
       }),
       "class": "error btn-icon"
-    }, [].concat(_hoisted_17))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, key) {
+    }, [].concat(_hoisted_16))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", _hoisted_18, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, key) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["row g-3", {
           'd-none': !val.meta.visible
@@ -20381,15 +20404,7 @@ __webpack_require__.r(__webpack_exports__);
 
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
-
-
 window.axios = axios__WEBPACK_IMPORTED_MODULE_1__["default"];
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /***/ }),
 

@@ -40,7 +40,7 @@
                                     </svg>
                                 </div>
                                 <div :class="{ open: confirmSaveOpen }" class="confirm-save text-bg-dark p-2">
-                                    <button type="button" class="btn btn-primary float-end">
+                                    <button @click="saveTransFiles" type="button" class="btn btn-primary float-end">
                                         Save for "{{ langCode }}"
                                     </button>
                                 </div>
@@ -53,7 +53,7 @@
                     </div>
                 </div>
                 <div class="bg-light rounded flex-grow-1">
-                    <form>
+                    <form autocomplete="off">
                         <div v-for="(val, key) in transFileContent" class="row g-3" :class="{ 'd-none': !val.meta.visible }"
                             :key="key">
                             <div class="col p-2"
@@ -80,6 +80,7 @@ import { filterErrors } from './phpTranslationManager/filters.js'
 export default {
     props: {
         transFilesContentsProp: Object,
+        saveTransFilesUrl: String,
     },
     data() {
         return {
@@ -92,23 +93,39 @@ export default {
     },
     methods: {
         filterErrors,
-        getTransFilesContents: function () {
-            var transFilesContents = {};
-            for (const prop in this.transFilesContentsProp) {
+        saveTransFiles: function () {
+            var data = {};
+            data[this.langCode] = this.transFilesContents[this.langCode];
+            axios
+                .post(this.saveTransFilesUrl, { trans: data })
+                .then((response) => {
+                    this.getTransFilesContents(response.data.transFilesContents);
+                }).catch((error) => {
+                    console.log(error);
+                });
+        },
+        getTransFilesContents: function (data) {
+            if (this.transFilesContents) {
+                var transFilesContents = this.transFilesContents;
+            } else {
+                var transFilesContents = {};
+                data = this.transFilesContentsProp;
+            }
+            for (const prop in data) {
                 transFilesContents[prop] = {};
-                for (const prop2 in this.transFilesContentsProp[prop]) {
+                for (const prop2 in data[prop]) {
                     var meta = {
                         visible: true,
                         new: false,
                         deleted: false,
                         modified: { key: false, val: false },
-                        orginalVal: this.transFilesContentsProp[prop][prop2],
+                        orginalVal: data[prop][prop2],
                         orginalKey: prop2,
                         error: '',
                     };
                     transFilesContents[prop][prop2] = {
                         meta: meta,
-                        val: this.transFilesContentsProp[prop][prop2],
+                        val: data[prop][prop2],
                         key: prop2
                     };
                 }

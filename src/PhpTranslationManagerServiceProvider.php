@@ -3,7 +3,8 @@
 namespace PhpTranslationManagerLaravel;
 
 use Illuminate\Support\ServiceProvider;
-use PhpTranslationManager\PhpTranslationManager;
+use PhpTranslationManagerLaravel\Service\PhpTranslationManagerService;
+use Illuminate\Contracts\Foundation\Application;
 
 class PhpTranslationManagerServiceProvider extends ServiceProvider
 {
@@ -24,5 +25,9 @@ class PhpTranslationManagerServiceProvider extends ServiceProvider
             __DIR__ . '/../config/phptranslationmanagerlaravel.php',
             'phptranslationmanagerlaravel'
         );
+
+        $this->app->singleton(PhpTranslationManagerService::class, function () {
+            return new PhpTranslationManagerService(config('phptranslationmanagerlaravel.lang_path'));
+        });
     }
 }
