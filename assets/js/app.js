@@ -20014,6 +20014,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         trans: data
       }).then(function (response) {
         _this.getTransFilesContents(response.data.transFilesContents);
+        _this.filterErrorsOn = false;
+        _this.confirmSaveOpen = false;
       })["catch"](function (error) {
         console.log(error);
       });

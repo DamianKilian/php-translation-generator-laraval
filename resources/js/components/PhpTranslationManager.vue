@@ -103,6 +103,8 @@ export default {
                 .post(this.saveTransFilesUrl, { trans: data })
                 .then((response) => {
                     this.getTransFilesContents(response.data.transFilesContents);
+                    this.filterErrorsOn = false;
+                    this.confirmSaveOpen = false;
                 }).catch((error) => {
                     console.log(error);
                 });
