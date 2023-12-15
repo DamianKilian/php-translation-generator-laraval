@@ -46,8 +46,10 @@
                                 </div>
                             </div>
                             <div @click="filterErrors" class="error btn-icon"
-                                v-if="Object.keys(duplicateKeyRecords).length !== 0">
-                                <span>&#9888;</span>
+                                v-if="Object.keys(duplicateKeyRecords).length !== 0 || filterErrorsOn">
+                                <span :class="{ 'text-success': Object.keys(duplicateKeyRecords).length === 0 }">
+                                    &#9888;
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -84,6 +86,7 @@ export default {
     },
     data() {
         return {
+            filterErrorsOn: false,
             duplicateKeyRecords: {},
             langCode: null,
             sidePanelOpen: false,
