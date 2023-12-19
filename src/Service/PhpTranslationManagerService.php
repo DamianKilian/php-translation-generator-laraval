@@ -19,9 +19,18 @@ class PhpTranslationManagerService
         foreach ($transFiles as $transFile) {
             $langCode = str_replace($this->langPath . '/', '', $transFile);
             $json = file_get_contents($transFile);
-            $transFilesContents[$langCode] = json_decode($json, true);
+            $transFilesContents[$langCode] = $this->wrapElementsInArray(json_decode($json, true));
         }
         return $transFilesContents;
+    }
+
+    public function wrapElementsInArray($arr)
+    {
+        $arrWrapped = [];
+        foreach ($arr as $key => $value) {
+            $arrWrapped[] = ['key' => $key, 'val' => $value];
+        }
+        return $arrWrapped;
     }
 
     public function saveTransFiles($transFilesContents)
@@ -31,13 +40,16 @@ class PhpTranslationManagerService
             $newTransFilesContents[$langCode] = $this->retrieveContent($trans);
         }
         $this->saveTransFilesContents($newTransFilesContents);
+        foreach ($newTransFilesContents as $key => $arr) {
+            $newTransFilesContents[$key] = $this->wrapElementsInArray($arr);
+        }
         return $newTransFilesContents;
     }
 
     protected function retrieveContent($trans)
     {
         $newTransFilesContent = [];
-        foreach ($trans as $key => $value) {
+        foreach ($trans as $value) {
             if (isset($newTransFilesContent[$value['key']])) {
                 throw new \Exception(self::ERR_MSG);
             }

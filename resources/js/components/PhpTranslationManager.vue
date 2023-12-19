@@ -7,7 +7,7 @@
         </div>
     </nav>
     <div @click="confirmSaveClose" class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show pt-5" v-for="(transFileContent, langCode) in transFilesContents"
+        <div class="tab-pane fade show pt-3 pe-4" v-for="(transFileContent, langCode) in transFilesContents"
             :class="{ 'active': langCode === Object.keys(transFilesContents)[0] }"
             :id="'nav-' + langCode.replace('.json', '')">
             <div class="d-flex">
@@ -28,6 +28,9 @@
                                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                                     </path>
                                 </svg>
+                            </div>
+                            <div @click="addNewTrans" class="new btn-icon">
+                                <span class="text-primary">&plusb;</span>
                             </div>
                             <div class="save-wrapper">
                                 <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-icon">
@@ -54,19 +57,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-light rounded flex-grow-1">
+                <div class="flex-grow-1 pb-5">
                     <form autocomplete="off">
-                        <div v-for="(val, key) in transFileContent" class="row g-3" :class="{ 'd-none': !val.meta.visible }"
-                            :key="key">
+                        <div v-for="(val, arrkey) in transFileContent" class="row g-3"
+                            :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new }" :key="val.meta.orginalKey">
                             <div class="col p-2"
                                 :class="{ 'bg-warning': val.meta.modified.key, 'bg-danger': '' !== val.meta.error }">
                                 {{ val.meta.error }}
                                 <textarea class="form-control key-textarea" rows="3" :value="val['key']"
-                                    @input="e => { translationModified(e, key, 'key') }"></textarea>
+                                    @input="e => { translationModified(e, arrkey, 'key') }"></textarea>
                             </div>
                             <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
                                 <textarea class="form-control val-textarea" rows="3" :value="val['val']"
-                                    @input="e => { translationModified(e, key, 'val') }"></textarea>
+                                    @input="e => { translationModified(e, arrkey, 'val') }"></textarea>
                             </div>
                         </div>
                     </form>
@@ -86,6 +89,7 @@ export default {
     },
     data() {
         return {
+            newTransKeys: [],
             filterErrorsOn: false,
             duplicateKeyRecords: {},
             langCode: null,
@@ -96,6 +100,29 @@ export default {
     },
     methods: {
         filterErrors,
+        getRandomInt: function (max) {
+            return Math.floor(Math.random() * max);
+        },
+        getKeys: function (trans) {
+            var keys = [];
+            trans.forEach(element => {
+                keys.push(element.key);
+            });
+            return keys;
+        },
+        addNewTrans: function () {
+            do {
+                var newKey = 'new_' + this.getRandomInt(999999);
+            } while (this.getKeys(this.transFilesContents[this.langCode]).indexOf(newKey) > -1);
+            var data = {
+                [this.langCode]: [{
+                    key: newKey,
+                    val: 'new'
+                }]
+            };
+            this.getTransFilesContents(data1, true);
+            this.newTransKeys.push(newKey);
+        },
         saveTransFiles: function () {
             var data = {};
             data[this.langCode] = this.transFilesContents[this.langCode];
@@ -109,30 +136,42 @@ export default {
                     console.log(error);
                 });
         },
-        getTransFilesContents: function (data) {
-            if (this.transFilesContents) {
-                var transFilesContents = this.transFilesContents;
-            } else {
-                var transFilesContents = {};
+        getMeta: function (orginalVal, orginalKey, addNewTrans) {
+            return {
+                visible: true,
+                new: !!addNewTrans,
+                deleted: false,
+                modified: { key: false, val: false },
+                orginalVal: orginalVal,
+                orginalKey: orginalKey,
+                error: '',
+            };
+        },
+        getTransFilesContents: function (data, addNewTrans) {
+            if (!data) {
                 data = this.transFilesContentsProp;
+                var transFilesContents = {};
+            } else {
+                var transFilesContents = this.transFilesContents;
             }
             for (const prop in data) {
-                transFilesContents[prop] = {};
-                for (const prop2 in data[prop]) {
-                    var meta = {
-                        visible: true,
-                        new: false,
-                        deleted: false,
-                        modified: { key: false, val: false },
-                        orginalVal: data[prop][prop2],
-                        orginalKey: prop2,
-                        error: '',
-                    };
-                    transFilesContents[prop][prop2] = {
+                if (!addNewTrans) {
+                    transFilesContents[prop] = [];
+                }
+                for (const keyVal of data[prop]) {
+                    var key = keyVal.key;
+                    var val = keyVal.val;
+                    var meta = this.getMeta(val, key, addNewTrans);
+                    var modified = {
                         meta: meta,
-                        val: data[prop][prop2],
-                        key: prop2
+                        val: val,
+                        key: key
                     };
+                    if (addNewTrans) {
+                        transFilesContents[prop].unshift(modified);
+                    } else {
+                        transFilesContents[prop].push(modified);
+                    }
                 }
             }
             return transFilesContents;
@@ -142,15 +181,15 @@ export default {
                 this.confirmSaveOpen = false;
             }
         },
-        translationModified: _.debounce(function (e, key, type) {
-            var keyRecord = this.transFilesContents[this.langCode][key];
+        translationModified: _.debounce(function (e, arrkey, type) {
+            var keyRecord = this.transFilesContents[this.langCode][arrkey];
             if ('key' === type) {
                 var newKey = e.target.value.trim();
                 if (newKey === keyRecord.key) {
                     return;
                 }
                 this.changeKey(keyRecord, newKey);
-                this.checkDuplicateKey(key, newKey);
+                this.checkDuplicateKey(arrkey, newKey);
             } else if ('val' === type) {
                 var newVal = e.target.value.trim();
                 if (newVal === keyRecord.val) {
@@ -180,10 +219,10 @@ export default {
         },
         checkDuplicateKey: function (key, newKey) {
             var keyRecord = this.transFilesContents[this.langCode][key];
-            var keyTextareas = document.querySelectorAll('.active .key-textarea');
             var matches = 0;
-            for (const keyTextarea of keyTextareas) {
-                if (newKey === keyTextarea.value) {
+            for (const key in this.transFilesContents[this.langCode]) {
+                var keyTextarea = this.transFilesContents[this.langCode][key];
+                if (newKey === keyTextarea.key) {
                     if (1 < ++matches) {
                         keyRecord.meta.error = 'duplicate key';
                         this.duplicateKeyRecords[key] = keyRecord;

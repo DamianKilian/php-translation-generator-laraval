@@ -19985,9 +19985,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./phpTranslationManager/filters.js */ "./resources/js/components/phpTranslationManager/filters.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
@@ -19996,6 +20000,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   data: function data() {
     return {
+      newTransKeys: [],
       filterErrorsOn: false,
       duplicateKeyRecords: {},
       langCode: null,
@@ -20006,6 +20011,27 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   methods: {
     filterErrors: _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__.filterErrors,
+    getRandomInt: function getRandomInt(max) {
+      return Math.floor(Math.random() * max);
+    },
+    getKeys: function getKeys(trans) {
+      var keys = [];
+      trans.forEach(function (element) {
+        keys.push(element.key);
+      });
+      return keys;
+    },
+    addNewTrans: function addNewTrans() {
+      do {
+        var newKey = 'new_' + this.getRandomInt(999999);
+      } while (this.getKeys(this.transFilesContents[this.langCode]).indexOf(newKey) > -1);
+      var data = _defineProperty({}, this.langCode, [{
+        key: newKey,
+        val: 'new'
+      }]);
+      this.getTransFilesContents(data1, true);
+      this.newTransKeys.push(newKey);
+    },
     saveTransFiles: function saveTransFiles() {
       var _this = this;
       var data = {};
@@ -20020,33 +20046,54 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         console.log(error);
       });
     },
-    getTransFilesContents: function getTransFilesContents(data) {
-      if (this.transFilesContents) {
-        var transFilesContents = this.transFilesContents;
-      } else {
-        var transFilesContents = {};
+    getMeta: function getMeta(orginalVal, orginalKey, addNewTrans) {
+      return {
+        visible: true,
+        "new": !!addNewTrans,
+        deleted: false,
+        modified: {
+          key: false,
+          val: false
+        },
+        orginalVal: orginalVal,
+        orginalKey: orginalKey,
+        error: ''
+      };
+    },
+    getTransFilesContents: function getTransFilesContents(data, addNewTrans) {
+      if (!data) {
         data = this.transFilesContentsProp;
+        var transFilesContents = {};
+      } else {
+        var transFilesContents = this.transFilesContents;
       }
       for (var prop in data) {
-        transFilesContents[prop] = {};
-        for (var prop2 in data[prop]) {
-          var meta = {
-            visible: true,
-            "new": false,
-            deleted: false,
-            modified: {
-              key: false,
-              val: false
-            },
-            orginalVal: data[prop][prop2],
-            orginalKey: prop2,
-            error: ''
-          };
-          transFilesContents[prop][prop2] = {
-            meta: meta,
-            val: data[prop][prop2],
-            key: prop2
-          };
+        if (!addNewTrans) {
+          transFilesContents[prop] = [];
+        }
+        var _iterator = _createForOfIteratorHelper(data[prop]),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var keyVal = _step.value;
+            var key = keyVal.key;
+            var val = keyVal.val;
+            var meta = this.getMeta(val, key, addNewTrans);
+            var modified = {
+              meta: meta,
+              val: val,
+              key: key
+            };
+            if (addNewTrans) {
+              transFilesContents[prop].unshift(modified);
+            } else {
+              transFilesContents[prop].push(modified);
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
         }
       }
       return transFilesContents;
@@ -20056,15 +20103,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         this.confirmSaveOpen = false;
       }
     },
-    translationModified: _.debounce(function (e, key, type) {
-      var keyRecord = this.transFilesContents[this.langCode][key];
+    translationModified: _.debounce(function (e, arrkey, type) {
+      var keyRecord = this.transFilesContents[this.langCode][arrkey];
       if ('key' === type) {
         var newKey = e.target.value.trim();
         if (newKey === keyRecord.key) {
           return;
         }
         this.changeKey(keyRecord, newKey);
-        this.checkDuplicateKey(key, newKey);
+        this.checkDuplicateKey(arrkey, newKey);
       } else if ('val' === type) {
         var newVal = e.target.value.trim();
         if (newVal === keyRecord.val) {
@@ -20094,25 +20141,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     },
     checkDuplicateKey: function checkDuplicateKey(key, newKey) {
       var keyRecord = this.transFilesContents[this.langCode][key];
-      var keyTextareas = document.querySelectorAll('.active .key-textarea');
       var matches = 0;
-      var _iterator = _createForOfIteratorHelper(keyTextareas),
-        _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var keyTextarea = _step.value;
-          if (newKey === keyTextarea.value) {
-            if (1 < ++matches) {
-              keyRecord.meta.error = 'duplicate key';
-              this.duplicateKeyRecords[key] = keyRecord;
-              return;
-            }
+      for (var _key in this.transFilesContents[this.langCode]) {
+        var keyTextarea = this.transFilesContents[this.langCode][_key];
+        if (newKey === keyTextarea.key) {
+          if (1 < ++matches) {
+            keyRecord.meta.error = 'duplicate key';
+            this.duplicateKeyRecords[_key] = keyRecord;
+            return;
           }
         }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
       }
       keyRecord.meta.error = '';
     },
@@ -20218,10 +20256,14 @@ var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
 })], -1 /* HOISTED */);
 var _hoisted_11 = [_hoisted_10];
-var _hoisted_12 = {
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "text-primary"
+}, "⊞", -1 /* HOISTED */);
+var _hoisted_13 = [_hoisted_12];
+var _hoisted_14 = {
   "class": "save-wrapper"
 };
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   width: "64",
   height: "64",
@@ -20238,15 +20280,15 @@ var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 }), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("polyline", {
   points: "7 3 7 8 15 8"
 })], -1 /* HOISTED */);
-var _hoisted_14 = [_hoisted_13];
-var _hoisted_15 = {
-  "class": "bg-light rounded flex-grow-1"
+var _hoisted_16 = [_hoisted_15];
+var _hoisted_17 = {
+  "class": "flex-grow-1 pb-5"
 };
-var _hoisted_16 = {
+var _hoisted_18 = {
   autocomplete: "off"
 };
-var _hoisted_17 = ["value", "onInput"];
-var _hoisted_18 = ["value", "onInput"];
+var _hoisted_19 = ["value", "onInput"];
+var _hoisted_20 = ["value", "onInput"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
@@ -20260,14 +20302,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-lang-code": langCode
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode), 11 /* TEXT, CLASS, PROPS */, _hoisted_2);
   }), 256 /* UNKEYED_FRAGMENT */))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[4] || (_cache[4] = function () {
+    onClick: _cache[5] || (_cache[5] = function () {
       return $options.confirmSaveClose && $options.confirmSaveClose.apply($options, arguments);
     }),
     "class": "tab-content",
     id: "nav-tabContent"
   }, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.transFilesContents, function (transFileContent, langCode) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["tab-pane fade show pt-5", {
+      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["tab-pane fade show pt-3 pe-4", {
         'active': langCode === Object.keys($data.transFilesContents)[0]
       }]),
       id: 'nav-' + langCode.replace('.json', '')
@@ -20280,24 +20322,29 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         return $data.sidePanelOpen = !$data.sidePanelOpen;
       }),
       "class": "openSettings btn-icon"
-    }, [].concat(_hoisted_11)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-      onClick: _cache[1] || (_cache[1] = function ($event) {
+    }, [].concat(_hoisted_11)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      onClick: _cache[1] || (_cache[1] = function () {
+        return $options.addNewTrans && $options.addNewTrans.apply($options, arguments);
+      }),
+      "class": "new btn-icon"
+    }, [].concat(_hoisted_13)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      onClick: _cache[2] || (_cache[2] = function ($event) {
         return $data.confirmSaveOpen = !$data.confirmSaveOpen;
       }),
       "class": "save btn-icon"
-    }, [].concat(_hoisted_14)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [].concat(_hoisted_16)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
         open: $data.confirmSaveOpen
       }, "confirm-save text-bg-dark p-2"])
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-      onClick: _cache[2] || (_cache[2] = function () {
+      onClick: _cache[3] || (_cache[3] = function () {
         return $options.saveTransFiles && $options.saveTransFiles.apply($options, arguments);
       }),
       type: "button",
       "class": "btn btn-primary float-end"
     }, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)]), Object.keys($data.duplicateKeyRecords).length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: 0,
-      onClick: _cache[3] || (_cache[3] = function () {
+      onClick: _cache[4] || (_cache[4] = function () {
         return $options.filterErrors && $options.filterErrors.apply($options, arguments);
       }),
       "class": "error btn-icon"
@@ -20305,12 +20352,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
         'text-success': Object.keys($data.duplicateKeyRecords).length === 0
       })
-    }, " ⚠ ", 2 /* CLASS */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", _hoisted_16, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, key) {
+    }, " ⚠ ", 2 /* CLASS */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", _hoisted_18, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, arrkey) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["row g-3", {
-          'd-none': !val.meta.visible
+          'd-none': !val.meta.visible,
+          'bg-primary': val.meta["new"]
         }]),
-        key: key
+        key: val.meta.orginalKey
       }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.key,
@@ -20321,9 +20369,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         rows: "3",
         value: val['key'],
         onInput: function onInput(e) {
-          $options.translationModified(e, key, 'key');
+          $options.translationModified(e, arrkey, 'key');
         }
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_17)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_19)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
@@ -20332,9 +20380,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         rows: "3",
         value: val['val'],
         onInput: function onInput(e) {
-          $options.translationModified(e, key, 'val');
+          $options.translationModified(e, arrkey, 'val');
         }
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_18)], 2 /* CLASS */)], 2 /* CLASS */);
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_20)], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */))])], 64 /* STABLE_FRAGMENT */);
 }

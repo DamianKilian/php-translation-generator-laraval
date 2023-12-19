@@ -11995,6 +11995,7 @@ textarea.form-control-lg {
   cursor: pointer;
   overflow: hidden;
   margin-bottom: 10px;
+  text-align: center;
 }
 .side-panel .btn-icon:hover svg,
 .side-panel .btn-icon:hover span {
