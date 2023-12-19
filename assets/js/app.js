@@ -20029,7 +20029,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         key: newKey,
         val: 'new'
       }]);
-      this.getTransFilesContents(data1, true);
+      this.getTransFilesContents(data, true);
       this.newTransKeys.push(newKey);
     },
     saveTransFiles: function saveTransFiles() {
@@ -20133,11 +20133,15 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     changeVal: function changeVal(keyRecord, newVal) {
       keyRecord.val = newVal;
-      keyRecord.meta.modified.val = newVal !== keyRecord.meta.orginalVal;
+      if (!keyRecord.meta["new"]) {
+        keyRecord.meta.modified.val = newVal !== keyRecord.meta.orginalVal;
+      }
     },
     changeKey: function changeKey(keyRecord, newKey) {
       keyRecord.key = newKey;
-      keyRecord.meta.modified.key = newKey !== keyRecord.meta.orginalKey;
+      if (!keyRecord.meta["new"]) {
+        keyRecord.meta.modified.key = newKey !== keyRecord.meta.orginalKey;
+      }
     },
     checkDuplicateKey: function checkDuplicateKey(key, newKey) {
       var keyRecord = this.transFilesContents[this.langCode][key];

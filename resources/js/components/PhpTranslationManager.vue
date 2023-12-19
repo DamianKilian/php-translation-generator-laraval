@@ -120,7 +120,7 @@ export default {
                     val: 'new'
                 }]
             };
-            this.getTransFilesContents(data1, true);
+            this.getTransFilesContents(data, true);
             this.newTransKeys.push(newKey);
         },
         saveTransFiles: function () {
@@ -211,11 +211,15 @@ export default {
         },
         changeVal: function (keyRecord, newVal) {
             keyRecord.val = newVal;
-            keyRecord.meta.modified.val = (newVal !== keyRecord.meta.orginalVal);
+            if (!keyRecord.meta.new) {
+                keyRecord.meta.modified.val = (newVal !== keyRecord.meta.orginalVal);
+            }
         },
         changeKey: function (keyRecord, newKey) {
             keyRecord.key = newKey;
-            keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
+            if (!keyRecord.meta.new) {
+                keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
+            }
         },
         checkDuplicateKey: function (key, newKey) {
             var keyRecord = this.transFilesContents[this.langCode][key];
