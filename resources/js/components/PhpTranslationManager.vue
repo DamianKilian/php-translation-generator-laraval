@@ -76,19 +76,28 @@
                 </div>
             </div>
         </div>
+        <Modal v-if="modalMsg.msg" :closeModal="closeModal" :modalMsg="modalMsg" />
     </div>
 </template>
 
 <script>
 import { filterErrors } from './phpTranslationManager/filters.js'
+import Modal from './Modal.vue'
 
 export default {
+    components: {
+        Modal
+    },
     props: {
         transFilesContentsProp: Object,
         saveTransFilesUrl: String,
     },
     data() {
         return {
+            modalMsg: {
+                msg: '',
+                type: '',
+            },
             newTransKeys: [],
             filterErrorsOn: false,
             duplicateKeyRecords: {},
@@ -100,6 +109,12 @@ export default {
     },
     methods: {
         filterErrors,
+        closeModal: function () {
+            this.modalMsg = {
+                msg: '',
+                type: '',
+            };
+        },
         getRandomInt: function (max) {
             return Math.floor(Math.random() * max);
         },
@@ -129,9 +144,16 @@ export default {
             axios
                 .post(this.saveTransFilesUrl, { trans: data })
                 .then((response) => {
-                    this.getTransFilesContents(response.data.transFilesContents);
-                    this.filterErrorsOn = false;
-                    this.confirmSaveOpen = false;
+                    if (response.data.success) {
+                        this.getTransFilesContents(response.data.transFilesContents);
+                        this.filterErrorsOn = false;
+                        this.confirmSaveOpen = false;
+                    } else {
+                        this.modalMsg = {
+                            msg: response.data.error,
+                            type: 'error',
+                        };
+                    }
                 }).catch((error) => {
                     console.log(error);
                 });
