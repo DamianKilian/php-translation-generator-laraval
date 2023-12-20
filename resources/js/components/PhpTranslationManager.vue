@@ -62,9 +62,10 @@
                         <div v-for="(val, arrkey) in transFileContent" class="row g-3"
                             :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new }" :key="val.meta.orginalKey">
                             <div class="col p-2"
-                                :class="{ 'bg-warning': val.meta.modified.key, 'bg-danger': '' !== val.meta.error }">
-                                {{ val.meta.error }}
-                                <textarea class="form-control key-textarea" rows="3" :value="val['key']"
+                                :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white': '' !== val.meta.error }">
+                                <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
+                                <textarea :class="{ 'text-danger': '' !== val.meta.error }"
+                                    class="form-control key-textarea" rows="3" :value="val['key']"
                                     @input="e => { translationModified(e, arrkey, 'key') }"></textarea>
                             </div>
                             <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">

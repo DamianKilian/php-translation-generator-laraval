@@ -20374,8 +20374,12 @@ var _hoisted_17 = {
 var _hoisted_18 = {
   autocomplete: "off"
 };
-var _hoisted_19 = ["value", "onInput"];
+var _hoisted_19 = {
+  key: 0,
+  "class": "text-danger"
+};
 var _hoisted_20 = ["value", "onInput"];
+var _hoisted_21 = ["value", "onInput"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
@@ -20450,16 +20454,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.key,
-          'bg-danger': '' !== val.meta.error
+          'border border-danger bg-white': '' !== val.meta.error
         }])
-      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error) + " ", 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
-        "class": "form-control key-textarea",
+      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_19, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+        "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
+          'text-danger': '' !== val.meta.error
+        }, "form-control key-textarea"]),
         rows: "3",
         value: val['key'],
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'key');
         }
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_19)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      }, null, 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_20)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
@@ -20470,7 +20476,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'val');
         }
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_20)], 2 /* CLASS */)], 2 /* CLASS */);
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_21)], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
     key: 0,
