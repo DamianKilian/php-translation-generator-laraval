@@ -58,22 +58,20 @@
                     </div>
                 </div>
                 <div class="flex-grow-1 pb-5">
-                    <form autocomplete="off">
-                        <div v-for="(val, arrkey) in transFileContent" class="row g-3"
-                            :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new }" :key="val.meta.orginalKey">
-                            <div class="col p-2"
-                                :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white': '' !== val.meta.error }">
-                                <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
-                                <textarea :class="{ 'text-danger': '' !== val.meta.error }"
-                                    class="form-control key-textarea" rows="3" :value="val['key']"
-                                    @input="e => { translationModified(e, arrkey, 'key') }"></textarea>
-                            </div>
-                            <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
-                                <textarea class="form-control val-textarea" rows="3" :value="val['val']"
-                                    @input="e => { translationModified(e, arrkey, 'val') }"></textarea>
-                            </div>
+                    <div v-for="(val, arrkey) in transFileContent" class="row g-3"
+                        :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new }" :key="val.meta.orginalKey">
+                        <div class="col p-2"
+                            :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white': '' !== val.meta.error }">
+                            <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
+                            <div contenteditable :class="{ 'text-danger': '' !== val.meta.error }"
+                                class="form-control key-textarea" rows="3"
+                                @input="e => { translationModified(e, arrkey, 'key') }">{{ val['key'] }}</div>
                         </div>
-                    </form>
+                        <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
+                            <div contenteditable class="form-control val-textarea" rows="3"
+                                @input="e => { translationModified(e, arrkey, 'val') }">{{ val['val'] }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,7 +173,6 @@ export default {
                 .post(this.getTransFilesContentsDataUrl)
                 .then((response) => {
                     this.getTransFilesContents(response.data.transFilesContents);
-
                 }).catch((error) => {
                     console.log(error);
                 });
@@ -211,14 +208,14 @@ export default {
         translationModified: _.debounce(function (e, arrkey, type) {
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
             if ('key' === type) {
-                var newKey = e.target.value.trim();
+                var newKey = e.target.innerText.trim();
                 if (newKey === keyRecord.key) {
                     return;
                 }
                 this.changeKey(keyRecord, newKey);
                 this.checkDuplicateKey(arrkey, newKey);
             } else if ('val' === type) {
-                var newVal = e.target.value.trim();
+                var newVal = e.target.innerText.trim();
                 if (newVal === keyRecord.val) {
                     return;
                 }
@@ -279,7 +276,7 @@ export default {
         // console.debug(this.transFilesContents);//mmmyyy
     },
     updated() {
-        if(!this.langCode){
+        if (!this.langCode) {
             this.gettingLangCodeFromTabs();
         }
         console.debug('updated');//mmmyyy
