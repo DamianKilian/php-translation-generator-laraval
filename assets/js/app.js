@@ -20021,7 +20021,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     Modal: _Modal_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   props: {
-    transFilesContentsProp: Object,
+    getTransFilesContentsDataUrl: String,
     saveTransFilesUrl: String
   },
   data: function data() {
@@ -20036,7 +20036,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       langCode: null,
       sidePanelOpen: false,
       confirmSaveOpen: false,
-      transFilesContents: this.getTransFilesContents()
+      transFilesContents: {}
     };
   },
   methods: {
@@ -20103,13 +20103,16 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         error: ''
       };
     },
+    getTransFilesContentsData: function getTransFilesContentsData() {
+      var _this2 = this;
+      axios.post(this.getTransFilesContentsDataUrl).then(function (response) {
+        _this2.getTransFilesContents(response.data.transFilesContents);
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
     getTransFilesContents: function getTransFilesContents(data, addNewTrans) {
-      if (!data) {
-        data = this.transFilesContentsProp;
-        var transFilesContents = {};
-      } else {
-        var transFilesContents = this.transFilesContents;
-      }
+      var transFilesContents = this.transFilesContents;
       for (var prop in data) {
         if (!addNewTrans) {
           transFilesContents[prop] = [];
@@ -20139,7 +20142,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           _iterator.f();
         }
       }
-      return transFilesContents;
     },
     confirmSaveClose: function confirmSaveClose(e) {
       if (!e.target.closest(".save-wrapper")) {
@@ -20202,21 +20204,24 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       keyRecord.meta.error = '';
     },
     gettingLangCodeFromTabs: function gettingLangCodeFromTabs() {
-      var _this2 = this;
+      var _this3 = this;
       this.langCode = document.querySelector('.nav-tabs .active').dataset.langCode;
       var tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
       tabEls.forEach(function (tabEl) {
         tabEl.addEventListener('shown.bs.tab', function (e) {
-          _this2.langCode = e.target.dataset.langCode;
+          _this3.langCode = e.target.dataset.langCode;
         });
       });
     }
   },
   mounted: function mounted() {
-    this.gettingLangCodeFromTabs();
+    this.getTransFilesContentsData();
     // console.debug(this.transFilesContents);//mmmyyy
   },
   updated: function updated() {
+    if (!this.langCode) {
+      this.gettingLangCodeFromTabs();
+    }
     console.debug('updated'); //mmmyyy
     // console.debug(this.duplicateKeyRecords);//mmmyyy
   }

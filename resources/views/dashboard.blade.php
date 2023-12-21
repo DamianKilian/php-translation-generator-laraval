@@ -9,7 +9,7 @@
 <body>
     <div id="app">
         <php-translation-manager save-trans-files-url="{{ route('save-trans-files') }}"
-            :trans-files-contents-prop='@json($transFilesContents)'></php-translation-manager>
+            get-trans-files-contents-data-url="{{ route('get-trans-files-contents-data') }}"></php-translation-manager>
     </div>
     <script src="{{ route('js') }}"></script>
 </body>

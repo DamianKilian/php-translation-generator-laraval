@@ -90,7 +90,7 @@ export default {
         Modal
     },
     props: {
-        transFilesContentsProp: Object,
+        getTransFilesContentsDataUrl: String,
         saveTransFilesUrl: String,
     },
     data() {
@@ -105,7 +105,7 @@ export default {
             langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
-            transFilesContents: this.getTransFilesContents(),
+            transFilesContents: {},
         }
     },
     methods: {
@@ -170,13 +170,18 @@ export default {
                 error: '',
             };
         },
+        getTransFilesContentsData: function () {
+            axios
+                .post(this.getTransFilesContentsDataUrl)
+                .then((response) => {
+                    this.getTransFilesContents(response.data.transFilesContents);
+
+                }).catch((error) => {
+                    console.log(error);
+                });
+        },
         getTransFilesContents: function (data, addNewTrans) {
-            if (!data) {
-                data = this.transFilesContentsProp;
-                var transFilesContents = {};
-            } else {
-                var transFilesContents = this.transFilesContents;
-            }
+            var transFilesContents = this.transFilesContents;
             for (const prop in data) {
                 if (!addNewTrans) {
                     transFilesContents[prop] = [];
@@ -197,7 +202,6 @@ export default {
                     }
                 }
             }
-            return transFilesContents;
         },
         confirmSaveClose: function (e) {
             if (!e.target.closest(".save-wrapper")) {
@@ -271,10 +275,13 @@ export default {
 
     },
     mounted() {
-        this.gettingLangCodeFromTabs();
+        this.getTransFilesContentsData();
         // console.debug(this.transFilesContents);//mmmyyy
     },
     updated() {
+        if(!this.langCode){
+            this.gettingLangCodeFromTabs();
+        }
         console.debug('updated');//mmmyyy
         // console.debug(this.duplicateKeyRecords);//mmmyyy
     }

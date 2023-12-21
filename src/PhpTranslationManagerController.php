@@ -8,12 +8,16 @@ use PhpTranslationManagerLaravel\Service\PhpTranslationManagerService;
 
 class PhpTranslationManagerController extends Controller
 {
+    public function getTransFilesContentsData(PhpTranslationManagerService $phpTranslationManagerService)
+    {
+        return response()->json([
+            'transFilesContents' => $phpTranslationManagerService->getTransFilesContents(),
+        ]);
+    }
+
     public function phptranslationmanager(PhpTranslationManagerService $phpTranslationManagerService)
     {
-        $transFilesContents = $phpTranslationManagerService->getTransFilesContents();
-        return view('php-translation-manager-laravel::dashboard', [
-            'transFilesContents' => $transFilesContents,
-        ]);
+        return view('php-translation-manager-laravel::dashboard');
     }
 
     public function saveTransFiles(Request $request, PhpTranslationManagerService $phpTranslationManagerService)
