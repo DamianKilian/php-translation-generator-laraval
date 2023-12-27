@@ -19,40 +19,53 @@
                     </div>
                     <div class="btns px-3">
                         <div class="sticky-top">
-                            <div @click="sidePanelOpen = !sidePanelOpen" class="openSettings btn-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
-                                    fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                    <path
-                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div @click="addNewTrans" class="new btn-icon">
-                                <span class="text-primary">&plusb;</span>
-                            </div>
-                            <div class="save-wrapper">
-                                <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-icon">
+                            <div class="app-btn">
+                                <div @click="sidePanelOpen = !sidePanelOpen" class="openSettings btn-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
                                         fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
                                         stroke-linejoin="round">
-                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                        <polyline points="7 3 7 8 15 8"></polyline>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
                                     </svg>
                                 </div>
-                                <div :class="{ open: confirmSaveOpen }" class="confirm-save text-bg-dark p-2">
-                                    <button @click="saveTransFiles" type="button" class="btn btn-primary float-end">
-                                        Save for "{{ langCode }}"
-                                    </button>
-                                </div>
+                                <div class="app-tooltip">Settings</div>
                             </div>
-                            <div @click="filterErrors" class="error btn-icon"
-                                v-if="Object.keys(duplicateKeyRecords).length !== 0 || filterErrorsOn">
-                                <span :class="{ 'text-success': Object.keys(duplicateKeyRecords).length === 0 }">
-                                    &#9888;
-                                </span>
+                            <div class="app-btn">
+                                <div @click="addNewTrans" class="new btn-icon">
+                                    <span class="text-primary">&plusb;</span>
+                                </div>
+                                <div class="app-tooltip">Add new trans</div>
+                            </div>
+                            <div class="app-btn">
+                                <div class="save-wrapper">
+                                    <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
+                                            fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z">
+                                            </path>
+                                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                            <polyline points="7 3 7 8 15 8"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div :class="{ open: confirmSaveOpen }" class="confirm-save text-bg-dark p-2">
+                                        <button @click="saveTransFiles" type="button" class="btn btn-primary float-end">
+                                            Save for "{{ langCode }}"
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="app-tooltip">Save</div>
+                            </div>
+                            <div class="app-btn">
+                                <div @click="filterErrors" class="error btn-icon"
+                                    v-if="Object.keys(duplicateKeyRecords).length !== 0 || filterErrorsOn">
+                                    <span :class="{ 'text-success': Object.keys(duplicateKeyRecords).length === 0 }">
+                                        &#9888;
+                                    </span>
+                                </div>
+                                <div class="app-tooltip">Filter Errors</div>
                             </div>
                         </div>
                     </div>

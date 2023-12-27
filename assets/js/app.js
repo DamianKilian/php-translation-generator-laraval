@@ -9038,17 +9038,19 @@ class MutableReactiveHandler extends BaseReactiveHandler {
   }
   set(target, key, value, receiver) {
     let oldValue = target[key];
-    if (isReadonly(oldValue) && isRef(oldValue) && !isRef(value)) {
-      return false;
-    }
     if (!this._shallow) {
+      const isOldValueReadonly = isReadonly(oldValue);
       if (!isShallow(value) && !isReadonly(value)) {
         oldValue = toRaw(oldValue);
         value = toRaw(value);
       }
       if (!(0,_vue_shared__WEBPACK_IMPORTED_MODULE_0__.isArray)(target) && isRef(oldValue) && !isRef(value)) {
-        oldValue.value = value;
-        return true;
+        if (isOldValueReadonly) {
+          return false;
+        } else {
+          oldValue.value = value;
+          return true;
+        }
       }
     }
     const hadKey = (0,_vue_shared__WEBPACK_IMPORTED_MODULE_0__.isArray)(target) && (0,_vue_shared__WEBPACK_IMPORTED_MODULE_0__.isIntegerKey)(key) ? Number(key) < target.length : (0,_vue_shared__WEBPACK_IMPORTED_MODULE_0__.hasOwn)(target, key);
@@ -11358,7 +11360,7 @@ function createSuspenseBoundary(vnode, parentSuspense, parentComponent, containe
     timeout: typeof timeout === "number" ? timeout : -1,
     activeBranch: null,
     pendingBranch: null,
-    isInFallback: true,
+    isInFallback: !isHydrating,
     isHydrating,
     isUnmounted: false,
     effects: [],
@@ -14697,6 +14699,16 @@ function createHydrationFunctions(rendererInternals) {
       if (dirs) {
         invokeDirectiveHook(vnode, null, parentComponent, "created");
       }
+      let needCallTransitionHooks = false;
+      if (isTemplateNode(el)) {
+        needCallTransitionHooks = needTransition(parentSuspense, transition) && parentComponent && parentComponent.vnode.props && parentComponent.vnode.props.appear;
+        const content = el.content.firstChild;
+        if (needCallTransitionHooks) {
+          transition.beforeEnter(content);
+        }
+        replaceNode(content, el, parentComponent);
+        vnode.el = el = content;
+      }
       if (props) {
         if (forcePatch || !optimized || patchFlag & (16 | 32)) {
           for (const key in props) {
@@ -14728,16 +14740,6 @@ function createHydrationFunctions(rendererInternals) {
       let vnodeHooks;
       if (vnodeHooks = props && props.onVnodeBeforeMount) {
         invokeVNodeHook(vnodeHooks, parentComponent, vnode);
-      }
-      let needCallTransitionHooks = false;
-      if (isTemplateNode(el)) {
-        needCallTransitionHooks = needTransition(parentSuspense, transition) && parentComponent && parentComponent.vnode.props && parentComponent.vnode.props.appear;
-        const content = el.content.firstChild;
-        if (needCallTransitionHooks) {
-          transition.beforeEnter(content);
-        }
-        replaceNode(content, el, parentComponent);
-        vnode.el = el = content;
       }
       if (dirs) {
         invokeDirectiveHook(vnode, null, parentComponent, "beforeMount");
@@ -17732,7 +17734,7 @@ function isMemoSame(cached, memo) {
   return true;
 }
 
-const version = "3.3.11";
+const version = "3.3.13";
 const _ssrUtils = {
   createComponentInstance,
   setupComponent,
@@ -18317,6 +18319,69 @@ function initVShowForSSR() {
   };
 }
 
+const CSS_VAR_TEXT = Symbol( true ? "CSS_VAR_TEXT" : 0);
+function useCssVars(getter) {
+  const instance = (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.getCurrentInstance)();
+  if (!instance) {
+     true && (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.warn)(`useCssVars is called without current active component instance.`);
+    return;
+  }
+  const updateTeleports = instance.ut = (vars = getter(instance.proxy)) => {
+    Array.from(
+      document.querySelectorAll(`[data-v-owner="${instance.uid}"]`)
+    ).forEach((node) => setVarsOnNode(node, vars));
+  };
+  const setVars = () => {
+    const vars = getter(instance.proxy);
+    setVarsOnVNode(instance.subTree, vars);
+    updateTeleports(vars);
+  };
+  (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.watchPostEffect)(setVars);
+  (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.onMounted)(() => {
+    const ob = new MutationObserver(setVars);
+    ob.observe(instance.subTree.el.parentNode, { childList: true });
+    (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.onUnmounted)(() => ob.disconnect());
+  });
+}
+function setVarsOnVNode(vnode, vars) {
+  if (vnode.shapeFlag & 128) {
+    const suspense = vnode.suspense;
+    vnode = suspense.activeBranch;
+    if (suspense.pendingBranch && !suspense.isHydrating) {
+      suspense.effects.push(() => {
+        setVarsOnVNode(suspense.activeBranch, vars);
+      });
+    }
+  }
+  while (vnode.component) {
+    vnode = vnode.component.subTree;
+  }
+  if (vnode.shapeFlag & 1 && vnode.el) {
+    setVarsOnNode(vnode.el, vars);
+  } else if (vnode.type === _vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.Fragment) {
+    vnode.children.forEach((c) => setVarsOnVNode(c, vars));
+  } else if (vnode.type === _vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.Static) {
+    let { el, anchor } = vnode;
+    while (el) {
+      setVarsOnNode(el, vars);
+      if (el === anchor)
+        break;
+      el = el.nextSibling;
+    }
+  }
+}
+function setVarsOnNode(el, vars) {
+  if (el.nodeType === 1) {
+    const style = el.style;
+    let cssText = "";
+    for (const key in vars) {
+      style.setProperty(`--${key}`, vars[key]);
+      cssText += `--${key}: ${vars[key]};`;
+    }
+    style[CSS_VAR_TEXT] = cssText;
+  }
+}
+
 function patchStyle(el, prev, next) {
   const style = el.style;
   const isCssString = (0,_vue_shared__WEBPACK_IMPORTED_MODULE_1__.isString)(next);
@@ -18335,6 +18400,10 @@ function patchStyle(el, prev, next) {
     const currentDisplay = style.display;
     if (isCssString) {
       if (prev !== next) {
+        const cssVarText = style[CSS_VAR_TEXT];
+        if (cssVarText) {
+          next += ";" + cssVarText;
+        }
         style.cssText = next;
       }
     } else if (prev) {
@@ -18841,65 +18910,6 @@ function useCssModule(name = "$style") {
   }
 }
 
-function useCssVars(getter) {
-  const instance = (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.getCurrentInstance)();
-  if (!instance) {
-     true && (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.warn)(`useCssVars is called without current active component instance.`);
-    return;
-  }
-  const updateTeleports = instance.ut = (vars = getter(instance.proxy)) => {
-    Array.from(
-      document.querySelectorAll(`[data-v-owner="${instance.uid}"]`)
-    ).forEach((node) => setVarsOnNode(node, vars));
-  };
-  const setVars = () => {
-    const vars = getter(instance.proxy);
-    setVarsOnVNode(instance.subTree, vars);
-    updateTeleports(vars);
-  };
-  (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.watchPostEffect)(setVars);
-  (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.onMounted)(() => {
-    const ob = new MutationObserver(setVars);
-    ob.observe(instance.subTree.el.parentNode, { childList: true });
-    (0,_vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.onUnmounted)(() => ob.disconnect());
-  });
-}
-function setVarsOnVNode(vnode, vars) {
-  if (vnode.shapeFlag & 128) {
-    const suspense = vnode.suspense;
-    vnode = suspense.activeBranch;
-    if (suspense.pendingBranch && !suspense.isHydrating) {
-      suspense.effects.push(() => {
-        setVarsOnVNode(suspense.activeBranch, vars);
-      });
-    }
-  }
-  while (vnode.component) {
-    vnode = vnode.component.subTree;
-  }
-  if (vnode.shapeFlag & 1 && vnode.el) {
-    setVarsOnNode(vnode.el, vars);
-  } else if (vnode.type === _vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.Fragment) {
-    vnode.children.forEach((c) => setVarsOnVNode(c, vars));
-  } else if (vnode.type === _vue_runtime_core__WEBPACK_IMPORTED_MODULE_0__.Static) {
-    let { el, anchor } = vnode;
-    while (el) {
-      setVarsOnNode(el, vars);
-      if (el === anchor)
-        break;
-      el = el.nextSibling;
-    }
-  }
-}
-function setVarsOnNode(el, vars) {
-  if (el.nodeType === 1) {
-    const style = el.style;
-    for (const key in vars) {
-      style.setProperty(`--${key}`, vars[key]);
-    }
-  }
-}
-
 const positionMap = /* @__PURE__ */ new WeakMap();
 const newPositionMap = /* @__PURE__ */ new WeakMap();
 const moveCbKey = Symbol("_moveCb");
@@ -19307,7 +19317,9 @@ const modifierGuards = {
   exact: (e, modifiers) => systemModifiers.some((m) => e[`${m}Key`] && !modifiers.includes(m))
 };
 const withModifiers = (fn, modifiers) => {
-  return fn._withMods || (fn._withMods = (event, ...args) => {
+  const cache = fn._withMods || (fn._withMods = {});
+  const cacheKey = modifiers.join(".");
+  return cache[cacheKey] || (cache[cacheKey] = (event, ...args) => {
     for (let i = 0; i < modifiers.length; i++) {
       const guard = modifierGuards[modifiers[i]];
       if (guard && guard(event, modifiers))
@@ -19326,7 +19338,9 @@ const keyNames = {
   delete: "backspace"
 };
 const withKeys = (fn, modifiers) => {
-  return fn._withKeys || (fn._withKeys = (event) => {
+  const cache = fn._withKeys || (fn._withKeys = {});
+  const cacheKey = modifiers.join(".");
+  return cache[cacheKey] || (cache[cacheKey] = (event) => {
     if (!("key" in event)) {
       return;
     }
@@ -19818,7 +19832,7 @@ const isKnownHtmlAttr = /* @__PURE__ */ makeMap(
   `accept,accept-charset,accesskey,action,align,allow,alt,async,autocapitalize,autocomplete,autofocus,autoplay,background,bgcolor,border,buffered,capture,challenge,charset,checked,cite,class,code,codebase,color,cols,colspan,content,contenteditable,contextmenu,controls,coords,crossorigin,csp,data,datetime,decoding,default,defer,dir,dirname,disabled,download,draggable,dropzone,enctype,enterkeyhint,for,form,formaction,formenctype,formmethod,formnovalidate,formtarget,headers,height,hidden,high,href,hreflang,http-equiv,icon,id,importance,inert,integrity,ismap,itemprop,keytype,kind,label,lang,language,loading,list,loop,low,manifest,max,maxlength,minlength,media,min,multiple,muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,preload,radiogroup,readonly,referrerpolicy,rel,required,reversed,rows,rowspan,sandbox,scope,scoped,selected,shape,size,sizes,slot,span,spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,target,title,translate,type,usemap,value,width,wrap`
 );
 const isKnownSvgAttr = /* @__PURE__ */ makeMap(
-  `xmlns,accent-height,accumulate,additive,alignment-baseline,alphabetic,amplitude,arabic-form,ascent,attributeName,attributeType,azimuth,baseFrequency,baseline-shift,baseProfile,bbox,begin,bias,by,calcMode,cap-height,class,clip,clipPathUnits,clip-path,clip-rule,color,color-interpolation,color-interpolation-filters,color-profile,color-rendering,contentScriptType,contentStyleType,crossorigin,cursor,cx,cy,d,decelerate,descent,diffuseConstant,direction,display,divisor,dominant-baseline,dur,dx,dy,edgeMode,elevation,enable-background,end,exponent,fill,fill-opacity,fill-rule,filter,filterRes,filterUnits,flood-color,flood-opacity,font-family,font-size,font-size-adjust,font-stretch,font-style,font-variant,font-weight,format,from,fr,fx,fy,g1,g2,glyph-name,glyph-orientation-horizontal,glyph-orientation-vertical,glyphRef,gradientTransform,gradientUnits,hanging,height,href,hreflang,horiz-adv-x,horiz-origin-x,id,ideographic,image-rendering,in,in2,intercept,k,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,kerning,keyPoints,keySplines,keyTimes,lang,lengthAdjust,letter-spacing,lighting-color,limitingConeAngle,local,marker-end,marker-mid,marker-start,markerHeight,markerUnits,markerWidth,mask,maskContentUnits,maskUnits,mathematical,max,media,method,min,mode,name,numOctaves,offset,opacity,operator,order,orient,orientation,origin,overflow,overline-position,overline-thickness,panose-1,paint-order,path,pathLength,patternContentUnits,patternTransform,patternUnits,ping,pointer-events,points,pointsAtX,pointsAtY,pointsAtZ,preserveAlpha,preserveAspectRatio,primitiveUnits,r,radius,referrerPolicy,refX,refY,rel,rendering-intent,repeatCount,repeatDur,requiredExtensions,requiredFeatures,restart,result,rotate,rx,ry,scale,seed,shape-rendering,slope,spacing,specularConstant,specularExponent,speed,spreadMethod,startOffset,stdDeviation,stemh,stemv,stitchTiles,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,string,stroke,stroke-dasharray,stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,stroke-opacity,stroke-width,style,surfaceScale,systemLanguage,tabindex,tableValues,target,targetX,targetY,text-anchor,text-decoration,text-rendering,textLength,to,transform,transform-origin,type,u1,u2,underline-position,underline-thickness,unicode,unicode-bidi,unicode-range,units-per-em,v-alphabetic,v-hanging,v-ideographic,v-mathematical,values,vector-effect,version,vert-adv-y,vert-origin-x,vert-origin-y,viewBox,viewTarget,visibility,width,widths,word-spacing,writing-mode,x,x-height,x1,x2,xChannelSelector,xlink:actuate,xlink:arcrole,xlink:href,xlink:role,xlink:show,xlink:title,xlink:type,xml:base,xml:lang,xml:space,y,y1,y2,yChannelSelector,z,zoomAndPan`
+  `xmlns,accent-height,accumulate,additive,alignment-baseline,alphabetic,amplitude,arabic-form,ascent,attributeName,attributeType,azimuth,baseFrequency,baseline-shift,baseProfile,bbox,begin,bias,by,calcMode,cap-height,class,clip,clipPathUnits,clip-path,clip-rule,color,color-interpolation,color-interpolation-filters,color-profile,color-rendering,contentScriptType,contentStyleType,crossorigin,cursor,cx,cy,d,decelerate,descent,diffuseConstant,direction,display,divisor,dominant-baseline,dur,dx,dy,edgeMode,elevation,enable-background,end,exponent,fill,fill-opacity,fill-rule,filter,filterRes,filterUnits,flood-color,flood-opacity,font-family,font-size,font-size-adjust,font-stretch,font-style,font-variant,font-weight,format,from,fr,fx,fy,g1,g2,glyph-name,glyph-orientation-horizontal,glyph-orientation-vertical,glyphRef,gradientTransform,gradientUnits,hanging,height,href,hreflang,horiz-adv-x,horiz-origin-x,id,ideographic,image-rendering,in,in2,intercept,k,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,kerning,keyPoints,keySplines,keyTimes,lang,lengthAdjust,letter-spacing,lighting-color,limitingConeAngle,local,marker-end,marker-mid,marker-start,markerHeight,markerUnits,markerWidth,mask,maskContentUnits,maskUnits,mathematical,max,media,method,min,mode,name,numOctaves,offset,opacity,operator,order,orient,orientation,origin,overflow,overline-position,overline-thickness,panose-1,paint-order,path,pathLength,patternContentUnits,patternTransform,patternUnits,ping,pointer-events,points,pointsAtX,pointsAtY,pointsAtZ,preserveAlpha,preserveAspectRatio,primitiveUnits,r,radius,referrerPolicy,refX,refY,rel,rendering-intent,repeatCount,repeatDur,requiredExtensions,requiredFeatures,restart,result,rotate,rx,ry,scale,seed,shape-rendering,slope,spacing,specularConstant,specularExponent,speed,spreadMethod,startOffset,stdDeviation,stemh,stemv,stitchTiles,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,string,stroke,stroke-dasharray,stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,stroke-opacity,stroke-width,style,surfaceScale,systemLanguage,tabindex,tableValues,target,targetX,targetY,text-anchor,text-decoration,text-rendering,textLength,to,transform,transform-origin,type,u1,u2,underline-position,underline-thickness,unicode,unicode-bidi,unicode-range,units-per-em,v-alphabetic,v-hanging,v-ideographic,v-mathematical,values,vector-effect,version,vert-adv-y,vert-origin-x,vert-origin-y,viewBox,viewTarget,visibility,width,widths,word-spacing,writing-mode,x,x-height,x1,x2,xChannelSelector,xlink:actuate,xlink:arcrole,xlink:href,xlink:role,xlink:show,xlink:title,xlink:type,xmlns:xlink,xml:base,xml:lang,xml:space,y,y1,y2,yChannelSelector,z,zoomAndPan`
 );
 
 const escapeRE = /["'&<>]/;
@@ -20012,8 +20026,8 @@ function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
-function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : String(i); }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -20333,7 +20347,10 @@ var _hoisted_8 = {
 var _hoisted_9 = {
   "class": "sticky-top"
 };
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_10 = {
+  "class": "app-btn"
+};
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   width: "64",
   height: "64",
@@ -20350,15 +20367,27 @@ var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 }), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
   d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
 })], -1 /* HOISTED */);
-var _hoisted_11 = [_hoisted_10];
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+var _hoisted_12 = [_hoisted_11];
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "app-tooltip"
+}, "Settings", -1 /* HOISTED */);
+var _hoisted_14 = {
+  "class": "app-btn"
+};
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "text-primary"
 }, "⊞", -1 /* HOISTED */);
-var _hoisted_13 = [_hoisted_12];
-var _hoisted_14 = {
+var _hoisted_16 = [_hoisted_15];
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "app-tooltip"
+}, "Add new trans", -1 /* HOISTED */);
+var _hoisted_18 = {
+  "class": "app-btn"
+};
+var _hoisted_19 = {
   "class": "save-wrapper"
 };
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   width: "64",
   height: "64",
@@ -20375,22 +20404,31 @@ var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 }), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("polyline", {
   points: "7 3 7 8 15 8"
 })], -1 /* HOISTED */);
-var _hoisted_16 = [_hoisted_15];
-var _hoisted_17 = {
+var _hoisted_21 = [_hoisted_20];
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "app-tooltip"
+}, "Save", -1 /* HOISTED */);
+var _hoisted_23 = {
+  "class": "app-btn"
+};
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "app-tooltip"
+}, "Filter Errors", -1 /* HOISTED */);
+var _hoisted_25 = {
   "class": "flex-grow-1 pb-5"
 };
-var _hoisted_18 = {
+var _hoisted_26 = {
   key: 0,
   "class": "text-danger"
 };
-var _hoisted_19 = {
+var _hoisted_27 = {
   "class": "trans"
 };
-var _hoisted_20 = ["onInput"];
-var _hoisted_21 = {
+var _hoisted_28 = ["onInput"];
+var _hoisted_29 = {
   "class": "trans"
 };
-var _hoisted_22 = ["onInput"];
+var _hoisted_30 = ["onInput"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
@@ -20420,22 +20458,22 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
         open: $data.sidePanelOpen
       }, "side-panel d-flex"])
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[0] || (_cache[0] = function ($event) {
         return $data.sidePanelOpen = !$data.sidePanelOpen;
       }),
       "class": "openSettings btn-icon"
-    }, [].concat(_hoisted_11)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [].concat(_hoisted_12)), _hoisted_13]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[1] || (_cache[1] = function () {
         return $options.addNewTrans && $options.addNewTrans.apply($options, arguments);
       }),
       "class": "new btn-icon"
-    }, [].concat(_hoisted_13)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [].concat(_hoisted_16)), _hoisted_17]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[2] || (_cache[2] = function ($event) {
         return $data.confirmSaveOpen = !$data.confirmSaveOpen;
       }),
       "class": "save btn-icon"
-    }, [].concat(_hoisted_16)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [].concat(_hoisted_21)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
         open: $data.confirmSaveOpen
       }, "confirm-save text-bg-dark p-2"])
@@ -20445,7 +20483,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }),
       type: "button",
       "class": "btn btn-primary float-end"
-    }, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)]), Object.keys($data.duplicateKeyRecords).length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    }, " Save for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\" ", 1 /* TEXT */)], 2 /* CLASS */)]), _hoisted_22]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [Object.keys($data.duplicateKeyRecords).length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: 0,
       onClick: _cache[4] || (_cache[4] = function () {
         return $options.filterErrors && $options.filterErrors.apply($options, arguments);
@@ -20455,7 +20493,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
         'text-success': Object.keys($data.duplicateKeyRecords).length === 0
       })
-    }, " ⚠ ", 2 /* CLASS */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, arrkey) {
+    }, " ⚠ ", 2 /* CLASS */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_24])])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, arrkey) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["row", {
           'd-none': !val.meta.visible,
@@ -20467,7 +20505,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           'bg-warning': val.meta.modified.key,
           'border border-danger bg-white border-3': '' !== val.meta.error
         }])
-      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_18, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_26, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
           'text-danger': '' !== val.meta.error
         }, "form-control key-textarea p-3"]),
@@ -20478,11 +20516,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'key');
         }
-      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_20)])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_28)])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
-      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": "form-control val-textarea p-3",
         rows: "3",
         onFocus: _cache[6] || (_cache[6] = function ($event) {
@@ -20491,7 +20529,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'val');
         }
-      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_22)])], 2 /* CLASS */)], 2 /* CLASS */);
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_30)])], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
     key: 0,
@@ -20568,6 +20606,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
+window.bootstrap = bootstrap__WEBPACK_IMPORTED_MODULE_0__;
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
 window.axios = axios__WEBPACK_IMPORTED_MODULE_1__["default"];
@@ -46831,7 +46870,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   VERSION: () => (/* binding */ VERSION)
 /* harmony export */ });
-const VERSION = "1.6.2";
+const VERSION = "1.6.3";
 
 /***/ }),
 
@@ -47120,7 +47159,7 @@ __webpack_require__.r(__webpack_exports__);
  */
 function combineURLs(baseURL, relativeURL) {
   return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    ? baseURL.replace(/\/?\/$/, '') + '/' + relativeURL.replace(/^\/+/, '')
     : baseURL;
 }
 

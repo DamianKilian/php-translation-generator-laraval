@@ -12007,6 +12007,29 @@ textarea.form-control-lg {
   color: red;
 }
 
+.app-btn {
+  position: relative;
+}
+.app-btn .app-tooltip {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  height: 2rem;
+  left: 61px;
+  margin: auto;
+}
+.app-btn:hover .app-tooltip {
+  visibility: visible;
+}
+
 .btns .save-wrapper {
   position: relative;
 }
