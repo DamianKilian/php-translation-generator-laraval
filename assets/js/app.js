@@ -20026,13 +20026,14 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   },
   data: function data() {
     return {
+      textareaInputBlocked: true,
       modalMsg: {
         msg: '',
         type: ''
       },
       newTransKeys: [],
       filterErrorsOn: false,
-      duplicateKeyRecords: {},
+      duplicateKeyRecords: [],
       langCode: null,
       sidePanelOpen: false,
       confirmSaveOpen: false,
@@ -20149,16 +20150,19 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }
     },
     translationModified: _.debounce(function (e, arrkey, type) {
+      if (this.textareaInputBlocked) {
+        return;
+      }
       var keyRecord = this.transFilesContents[this.langCode][arrkey];
       if ('key' === type) {
-        var newKey = e.target.innerText.trim();
+        var newKey = e.target.value.trim();
         if (newKey === keyRecord.key) {
           return;
         }
         this.changeKey(keyRecord, newKey);
-        this.checkDuplicateKey(arrkey, newKey);
+        this.checkDuplicateKey(keyRecord, newKey);
       } else if ('val' === type) {
-        var newVal = e.target.innerText.trim();
+        var newVal = e.target.value.trim();
         if (newVal === keyRecord.val) {
           return;
         }
@@ -20172,8 +20176,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }
       for (var key in this.duplicateKeyRecords) {
         var keyRecord = this.duplicateKeyRecords[key];
-        delete this.duplicateKeyRecords[key];
-        this.checkDuplicateKey(key, keyRecord.key);
+        this.duplicateKeyRecords.splice(key, 1);
+        this.checkDuplicateKey(keyRecord, keyRecord.key);
       }
     },
     changeVal: function changeVal(keyRecord, newVal) {
@@ -20188,15 +20192,14 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         keyRecord.meta.modified.key = newKey !== keyRecord.meta.orginalKey;
       }
     },
-    checkDuplicateKey: function checkDuplicateKey(key, newKey) {
-      var keyRecord = this.transFilesContents[this.langCode][key];
+    checkDuplicateKey: function checkDuplicateKey(keyRecord, newKey) {
       var matches = 0;
-      for (var _key in this.transFilesContents[this.langCode]) {
-        var keyTextarea = this.transFilesContents[this.langCode][_key];
+      for (var key in this.transFilesContents[this.langCode]) {
+        var keyTextarea = this.transFilesContents[this.langCode][key];
         if (newKey === keyTextarea.key) {
           if (1 < ++matches) {
             keyRecord.meta.error = 'duplicate key';
-            this.duplicateKeyRecords[_key] = keyRecord;
+            this.duplicateKeyRecords.push(keyRecord);
             return;
           }
         }
@@ -20380,8 +20383,14 @@ var _hoisted_18 = {
   key: 0,
   "class": "text-danger"
 };
-var _hoisted_19 = ["onInput"];
+var _hoisted_19 = {
+  "class": "trans"
+};
 var _hoisted_20 = ["onInput"];
+var _hoisted_21 = {
+  "class": "trans"
+};
+var _hoisted_22 = ["onInput"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
@@ -20396,7 +20405,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-lang-code": langCode
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode), 11 /* TEXT, CLASS, PROPS */, _hoisted_2);
   }), 256 /* UNKEYED_FRAGMENT */))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    onClick: _cache[5] || (_cache[5] = function () {
+    onClick: _cache[7] || (_cache[7] = function () {
       return $options.confirmSaveClose && $options.confirmSaveClose.apply($options, arguments);
     }),
     "class": "tab-content",
@@ -20448,7 +20457,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       })
     }, " ⚠ ", 2 /* CLASS */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, arrkey) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-        "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["row g-3", {
+        "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["row", {
           'd-none': !val.meta.visible,
           'bg-primary': val.meta["new"]
         }]),
@@ -20456,29 +20465,33 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.key,
-          'border border-danger bg-white': '' !== val.meta.error
+          'border border-danger bg-white border-3': '' !== val.meta.error
         }])
-      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_18, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-        contenteditable: "",
+      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_18, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
           'text-danger': '' !== val.meta.error
-        }, "form-control key-textarea"]),
+        }, "form-control key-textarea p-3"]),
         rows: "3",
+        onFocus: _cache[5] || (_cache[5] = function ($event) {
+          return $data.textareaInputBlocked = false;
+        }),
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'key');
         }
-      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_19)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_20)])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
-      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-        contenteditable: "",
-        "class": "form-control val-textarea",
+      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+        "class": "form-control val-textarea p-3",
         rows: "3",
+        onFocus: _cache[6] || (_cache[6] = function ($event) {
+          return $data.textareaInputBlocked = false;
+        }),
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'val');
         }
-      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_20)], 2 /* CLASS */)], 2 /* CLASS */);
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_22)])], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
     key: 0,

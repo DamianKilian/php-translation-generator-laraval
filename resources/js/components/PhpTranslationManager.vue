@@ -58,18 +58,23 @@
                     </div>
                 </div>
                 <div class="flex-grow-1 pb-5">
-                    <div v-for="(val, arrkey) in transFileContent" class="row g-3"
+                    <div v-for="(val, arrkey) in transFileContent" class="row"
                         :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new }" :key="val.meta.orginalKey">
                         <div class="col p-2"
-                            :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white': '' !== val.meta.error }">
+                            :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white border-3': '' !== val.meta.error }">
                             <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
-                            <div contenteditable :class="{ 'text-danger': '' !== val.meta.error }"
-                                class="form-control key-textarea" rows="3"
-                                @input="e => { translationModified(e, arrkey, 'key') }">{{ val['key'] }}</div>
+                            <div class="trans">
+                                <textarea :class="{ 'text-danger': '' !== val.meta.error }"
+                                    class="form-control key-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
+                                    @input="e => { translationModified(e, arrkey, 'key') }">{{ val['key'] }}</textarea>
+                            </div>
                         </div>
                         <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
-                            <div contenteditable class="form-control val-textarea" rows="3"
-                                @input="e => { translationModified(e, arrkey, 'val') }">{{ val['val'] }}</div>
+                            <div class="trans">
+                                <textarea class="form-control val-textarea p-3" rows="3"
+                                    @focus="textareaInputBlocked = false"
+                                    @input="e => { translationModified(e, arrkey, 'val') }">{{ val['val'] }}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -93,13 +98,14 @@ export default {
     },
     data() {
         return {
+            textareaInputBlocked: true,
             modalMsg: {
                 msg: '',
                 type: '',
             },
             newTransKeys: [],
             filterErrorsOn: false,
-            duplicateKeyRecords: {},
+            duplicateKeyRecords: [],
             langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
@@ -206,16 +212,19 @@ export default {
             }
         },
         translationModified: _.debounce(function (e, arrkey, type) {
+            if (this.textareaInputBlocked) {
+                return;
+            }
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
             if ('key' === type) {
-                var newKey = e.target.innerText.trim();
+                var newKey = e.target.value.trim();
                 if (newKey === keyRecord.key) {
                     return;
                 }
                 this.changeKey(keyRecord, newKey);
-                this.checkDuplicateKey(arrkey, newKey);
+                this.checkDuplicateKey(keyRecord, newKey);
             } else if ('val' === type) {
-                var newVal = e.target.innerText.trim();
+                var newVal = e.target.value.trim();
                 if (newVal === keyRecord.val) {
                     return;
                 }
@@ -229,8 +238,8 @@ export default {
             }
             for (const key in this.duplicateKeyRecords) {
                 var keyRecord = this.duplicateKeyRecords[key];
-                delete this.duplicateKeyRecords[key];
-                this.checkDuplicateKey(key, keyRecord.key);
+                this.duplicateKeyRecords.splice(key, 1);
+                this.checkDuplicateKey(keyRecord, keyRecord.key);
             }
         },
         changeVal: function (keyRecord, newVal) {
@@ -245,15 +254,14 @@ export default {
                 keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
             }
         },
-        checkDuplicateKey: function (key, newKey) {
-            var keyRecord = this.transFilesContents[this.langCode][key];
+        checkDuplicateKey: function (keyRecord, newKey) {
             var matches = 0;
             for (const key in this.transFilesContents[this.langCode]) {
                 var keyTextarea = this.transFilesContents[this.langCode][key];
                 if (newKey === keyTextarea.key) {
                     if (1 < ++matches) {
                         keyRecord.meta.error = 'duplicate key';
-                        this.duplicateKeyRecords[key] = keyRecord;
+                        this.duplicateKeyRecords.push(keyRecord);
                         return;
                     }
                 }
