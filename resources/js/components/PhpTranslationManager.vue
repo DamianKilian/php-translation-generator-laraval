@@ -39,6 +39,7 @@
                                 <div class="app-tooltip">Add new trans</div>
                             </div>
                             <div class="app-btn">
+                                <div class="app-tooltip">Save</div>
                                 <div class="save-wrapper">
                                     <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
@@ -56,7 +57,6 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="app-tooltip">Save</div>
                             </div>
                             <div class="app-btn">
                                 <div @click="filterErrors" class="error btn-icon"
