@@ -8,11 +8,9 @@
     ],
     "autoload": {
         "psr-4": {
+            "PhpTranslationManagerLaravel\\Tests\\": "tests/",
             "PhpTranslationManagerLaravel\\": "src/"
         }
-    },
-    "require": {
-        "illuminate/support": ">=6.0"
     },
     "extra": {
         "laravel": {
@@ -22,5 +20,9 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": false
+    "prefer-stable": false,
+    "require-dev": {
+        "phpunit/phpunit": "^10",
+        "illuminate/support": ">=6.0"
+    }
 }

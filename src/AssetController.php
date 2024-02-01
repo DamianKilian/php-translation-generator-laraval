@@ -43,6 +43,8 @@ class AssetController extends Controller
      */
     protected function cacheResponse(Response $response)
     {
+
+        
         // $response->setSharedMaxAge(31536000);
         // $response->setMaxAge(31536000);
         // $response->setExpires(new \DateTime('+1 year'));
