@@ -27,8 +27,8 @@ class PhpTranslationManagerService
     public function wrapElementsInArray($arr)
     {
         $arrWrapped = [];
-        foreach ($arr as $key => $value) {
-            $arrWrapped[] = ['key' => $key, 'val' => $value];
+        foreach ($arr as $key => $val) {
+            $arrWrapped[] = ['key' => $key, 'val' => $val];
         }
         return $arrWrapped;
     }
