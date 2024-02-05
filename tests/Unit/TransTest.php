@@ -46,6 +46,22 @@ class TransTest extends TestCase
         $this->assertTrue($testArr === $testArrService);
     }
 
+    public function test_retrieveContent_duplicate_key_exception()
+    {
+        $phpTranslationManagerService = new PhpTranslationManagerService('');
+        $testArrWrapped = [
+            ['key' => 'k1', 'val' => 'v1'],
+            ['key' => 'k2', 'val' => 'v2'],
+            ['key' => 'k2', 'val' => 'v2'],
+            ['key' => 'k3', 'val' => 'v3'],
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Duplicate key');
+
+        $this->invokeMethod($phpTranslationManagerService, 'retrieveContent', array($testArrWrapped));
+    }
+
     /**
      * Call protected/private method of a class.
      *
