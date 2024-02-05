@@ -27,4 +27,40 @@ class TransTest extends TestCase
         $this->assertTrue($testArrWrapped === $testArrWrappedService);
     }
 
+    public function test_retrieveContent()
+    {
+        $phpTranslationManagerService = new PhpTranslationManagerService('');
+        $testArrWrapped = [
+            ['key' => 'k1', 'val' => 'v1'],
+            ['key' => 'k2', 'val' => 'v2'],
+            ['key' => 'k3', 'val' => 'v3'],
+        ];
+        $testArr = [
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ];
+
+        $testArrService = $this->invokeMethod($phpTranslationManagerService, 'retrieveContent', array($testArrWrapped));
+
+        $this->assertTrue($testArr === $testArrService);
+    }
+
+    /**
+     * Call protected/private method of a class.
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array  $parameters Array of parameters to pass into method.
+     *
+     * @return mixed Method return.
+     */
+    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
+    }
 }
