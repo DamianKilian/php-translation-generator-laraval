@@ -9,6 +9,30 @@ use org\bovigo\vfs\vfsStream;
 class TransTest extends TestCase
 {
 
+    public function test_streamSafeGlob()
+    {
+        $plJson = [
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ];
+        $enJson = [
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ];
+        $found = [
+            "vfs://exampleDir/en.json",
+            "vfs://exampleDir/pl.json",
+        ];
+        $root = vfsStream::setup('exampleDir');
+        file_put_contents(vfsStream::url('exampleDir') . '/pl.json', json_encode($plJson));
+        file_put_contents(vfsStream::url('exampleDir') . '/en.json', json_encode($enJson));
+        $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'));
+
+        $this->assertTrue($found === $this->invokeMethod($phpTranslationManagerService, 'streamSafeGlob', array(vfsStream::url('exampleDir'), '*.json')));
+    }
+
     public function test_wrapElementsInArray()
     {
         $phpTranslationManagerService = new PhpTranslationManagerService('');
