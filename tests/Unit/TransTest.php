@@ -4,6 +4,7 @@ namespace PhpTranslationManagerLaravel\Tests\Unit;
 
 use PhpTranslationManagerLaravel\Tests\TestCase;
 use PhpTranslationManagerLaravel\Service\PhpTranslationManagerService;
+use org\bovigo\vfs\vfsStream;
 
 class TransTest extends TestCase
 {
@@ -60,6 +61,38 @@ class TransTest extends TestCase
         $this->expectExceptionMessage('Duplicate key');
 
         $this->invokeMethod($phpTranslationManagerService, 'retrieveContent', array($testArrWrapped));
+    }
+
+    public function test_getTransFilesContents()
+    {
+        $plJson = [
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ];
+        $enJson = [
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ];
+        $root = vfsStream::setup('exampleDir');
+        file_put_contents(vfsStream::url('exampleDir') . '/pl.json', json_encode($plJson));
+        file_put_contents(vfsStream::url('exampleDir') . '/en.json', json_encode($enJson));
+        $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'));
+        $transFilesContents = array(
+            'en.json' => array(
+                0 => array('key' => 'k1', 'val' => 'v1',),
+                1 => array('key' => 'k2', 'val' => 'v2',),
+                2 => array('key' => 'k3', 'val' => 'v3',),
+            ),
+            'pl.json' => array(
+                0 => array('key' => 'k1', 'val' => 'v1',),
+                1 => array('key' => 'k2', 'val' => 'v2',),
+                2 => array('key' => 'k3', 'val' => 'v3',),
+            ),
+        );
+
+        $this->assertTrue($transFilesContents === $phpTranslationManagerService->getTransFilesContents());
     }
 
     /**
