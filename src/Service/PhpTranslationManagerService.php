@@ -12,9 +12,30 @@ class PhpTranslationManagerService
         $this->langPath = $langPath;
     }
 
+    /**
+     * Glob that is safe with streams (vfs for example)
+     *
+     * @param string $directory
+     * @param string $filePattern
+     * @return array
+     */
+    private function streamSafeGlob($directory, $filePattern)
+    {
+        $files = scandir($directory);
+        $found = array();
+
+        foreach ($files as $filename) {
+            if (fnmatch($filePattern, $filename)) {
+                $found[] = $directory . '/' . $filename;
+            }
+        }
+
+        return $found;
+    }
+
     public function getTransFilesContents()
     {
-        $transFiles = glob($this->langPath . '/*.json');
+        $transFiles = $this->streamSafeGlob($this->langPath, '*.json');
         $transFilesContents = [];
         foreach ($transFiles as $transFile) {
             $langCode = str_replace($this->langPath . '/', '', $transFile);
