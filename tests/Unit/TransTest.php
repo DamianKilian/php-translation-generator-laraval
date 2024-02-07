@@ -9,6 +9,27 @@ use org\bovigo\vfs\vfsStream;
 class TransTest extends TestCase
 {
 
+    public function test_saveTransFiles()
+    {
+        $transFilesContents = array(
+            'en.json' => array(
+                array('key' => 'k1', 'val' => 'v1',),
+                array('key' => 'k2', 'val' => 'v2',),
+                array('key' => 'k3', 'val' => 'v3',),
+            ),
+            'pl.json' => array(
+                array('key' => 'k1', 'val' => 'v1',),
+                array('key' => 'k2', 'val' => 'v2',),
+                array('key' => 'k3', 'val' => 'v3',),
+            ),
+        );
+        $root = vfsStream::setup('exampleDir');
+        $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'));
+
+        $this->assertTrue($transFilesContents == $phpTranslationManagerService->saveTransFiles($transFilesContents));
+        $this->assertTrue($transFilesContents === $phpTranslationManagerService->getTransFilesContents());
+    }
+
     public function test_streamSafeGlob()
     {
         $plJson = [
@@ -105,14 +126,14 @@ class TransTest extends TestCase
         $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'));
         $transFilesContents = array(
             'en.json' => array(
-                0 => array('key' => 'k1', 'val' => 'v1',),
-                1 => array('key' => 'k2', 'val' => 'v2',),
-                2 => array('key' => 'k3', 'val' => 'v3',),
+                array('key' => 'k1', 'val' => 'v1',),
+                array('key' => 'k2', 'val' => 'v2',),
+                array('key' => 'k3', 'val' => 'v3',),
             ),
             'pl.json' => array(
-                0 => array('key' => 'k1', 'val' => 'v1',),
-                1 => array('key' => 'k2', 'val' => 'v2',),
-                2 => array('key' => 'k3', 'val' => 'v3',),
+                array('key' => 'k1', 'val' => 'v1',),
+                array('key' => 'k2', 'val' => 'v2',),
+                array('key' => 'k3', 'val' => 'v3',),
             ),
         );
 
