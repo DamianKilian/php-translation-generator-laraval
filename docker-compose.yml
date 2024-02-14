@@ -1,0 +1,19 @@
+version: '3'
+
+networks:
+  php-translation-manager-laravel:
+
+
+services:
+  npm:
+    image: node:current-alpine
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "5173:5173"
+    working_dir: /var/www/html
+    networks:
+      - php-translation-manager-laravel
+
