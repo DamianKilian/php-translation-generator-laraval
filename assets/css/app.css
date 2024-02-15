@@ -12097,3 +12097,13 @@ textarea.form-control-lg {
   top: 0;
   left: 0;
 }
+
+.trans {
+  display: flex;
+}
+.trans .actions .select-action {
+  width: 25px;
+  height: 25px;
+  margin: 5px;
+  display: block;
+}
