@@ -21496,6 +21496,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   },
   data: function data() {
     return {
+      lastTransSelectedOrginalKey: '',
       textareaInputBlocked: true,
       modalMsg: {
         msg: '',
@@ -21520,7 +21521,36 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     },
     selectAction: function selectAction(e, arrkey) {
       var keyRecord = this.transFilesContents[this.langCode][arrkey];
-      keyRecord.meta.selected = !keyRecord.meta.selected;
+      if (!keyRecord.meta.selected) {
+        if (this.lastTransSelectedOrginalKey === keyRecord.meta.orginalKey) {
+          this.lastTransSelectedOrginalKey = '';
+        }
+        return;
+      }
+      ;
+      this.lastTransSelectedOrginalKey = keyRecord.meta.orginalKey;
+    },
+    selectActionMulti: function selectActionMulti(e, arrkey) {
+      console.debug('selectActionMulti'); //mmmyyy
+      console.debug('' === this.lastTransSelectedOrginalKey); //mmmyyy
+      if ('' === this.lastTransSelectedOrginalKey) {
+        return;
+      }
+      // var orginalKeyMulti = this.transFilesContents[this.langCode][arrkey].meta.orginalKey;
+      var lastTransSelectedArrkey = null;
+      for (var _key in this.transFilesContents[this.langCode]) {
+        var orginalKey = this.transFilesContents[this.langCode][_key].meta.orginalKey;
+        if (orginalKey === this.lastTransSelectedOrginalKey) {
+          lastTransSelectedArrkey = _key;
+        }
+      }
+      var lowerKey = Math.min(arrkey, lastTransSelectedArrkey);
+      var key = Math.max(arrkey, lastTransSelectedArrkey) + 1;
+      while (key !== lowerKey) {
+        console.debug(key); //mmmyyy
+        key--;
+        this.transFilesContents[this.langCode][key].meta.selected = true;
+      }
     },
     getRandomInt: function getRandomInt(max) {
       return Math.floor(Math.random() * max);
@@ -21888,7 +21918,7 @@ var _hoisted_27 = {
 var _hoisted_28 = {
   "class": "actions"
 };
-var _hoisted_29 = ["onChange"];
+var _hoisted_29 = ["onChange", "onUpdate:modelValue", "onClick"];
 var _hoisted_30 = ["onInput"];
 var _hoisted_31 = {
   "class": "trans"
@@ -21970,13 +22000,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           'bg-warning': val.meta.modified.key,
           'border border-danger bg-white border-3': '' !== val.meta.error
         }])
-      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_26, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+      }, ['' !== val.meta.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("b", _hoisted_26, "⚠ " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val.meta.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
         onChange: function onChange($event) {
           return $options.selectAction($event, arrkey);
         },
+        "onUpdate:modelValue": function onUpdateModelValue($event) {
+          return val['meta'].selected = $event;
+        },
+        onClick: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+          return $options.selectActionMulti($event, arrkey);
+        }, ["shift"]),
         "class": "select-action",
         type: "checkbox"
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_29)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_29), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, val['meta'].selected]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
           'text-danger': '' !== val.meta.error
         }, "form-control key-textarea p-3"]),

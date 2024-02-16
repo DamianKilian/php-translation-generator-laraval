@@ -78,7 +78,9 @@
                             <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
                             <div class="trans">
                                 <div class="actions">
-                                    <input @click="selectAction($event, arrkey)" class="select-action" type="checkbox">
+                                    <input @change="selectAction($event, arrkey)" v-model="val['meta'].selected"
+                                        @click.shift="selectActionMulti($event, arrkey)" class="select-action"
+                                        type="checkbox">
                                 </div>
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
                                     class="form-control key-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
@@ -114,6 +116,7 @@ export default {
     },
     data() {
         return {
+            lastTransSelectedOrginalKey: '',
             textareaInputBlocked: true,
             modalMsg: {
                 msg: '',
@@ -136,9 +139,36 @@ export default {
                 type: '',
             };
         },
-        selectAction: function(e, arrkey){
+        selectAction: function (e, arrkey) {
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
-            keyRecord.meta.selected = e.target.checked;
+            if (!keyRecord.meta.selected) {
+                if (this.lastTransSelectedOrginalKey === keyRecord.meta.orginalKey) {
+                    this.lastTransSelectedOrginalKey = '';
+                }
+                return;
+            };
+            this.lastTransSelectedOrginalKey = keyRecord.meta.orginalKey;
+        },
+        selectActionMulti: function (e, arrkey) {
+            console.debug('selectActionMulti');//mmmyyy
+            console.debug('' === this.lastTransSelectedOrginalKey);//mmmyyy
+            if ('' === this.lastTransSelectedOrginalKey) {
+                return;
+            }
+            var lastTransSelectedArrkey = null;
+            for (const key in this.transFilesContents[this.langCode]) {
+                var orginalKey = this.transFilesContents[this.langCode][key].meta.orginalKey;
+                if (orginalKey === this.lastTransSelectedOrginalKey) {
+                    lastTransSelectedArrkey = key;
+                }
+            }
+            var lowerKey = Math.min(arrkey, lastTransSelectedArrkey);
+            var key = Math.max(arrkey, lastTransSelectedArrkey) + 1;
+            while (key !== lowerKey) {
+                console.debug(key);//mmmyyy
+                key--;
+                this.transFilesContents[this.langCode][key].meta.selected = true;
+            }
         },
         getRandomInt: function (max) {
             return Math.floor(Math.random() * max);
