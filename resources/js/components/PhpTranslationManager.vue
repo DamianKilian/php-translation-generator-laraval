@@ -64,6 +64,7 @@
                                     <span class="text-secondary">
                                         &#9744;
                                     </span>
+                                    <div id="countSelectedTransNum">({{ countSelectedTransNum() }})</div>
                                 </div>
                                 <div class="app-tooltip">Deselect all</div>
                             </div>
@@ -140,8 +141,22 @@ export default {
             transFilesContents: {},
         }
     },
+    computed: {
+        countSelectedTransNum() {
+            return this.countSelectedTrans;
+        }
+    },
     methods: {
         filterErrors,
+        countSelectedTrans: function () {
+            var countSelectedTransNum = 0;
+            for (const key in this.transFilesContents[this.langCode]) {
+                if (this.transFilesContents[this.langCode][key].meta.selected) {
+                    countSelectedTransNum += 1;
+                }
+            }
+            return countSelectedTransNum;
+        },
         deselectTrans: function () {
             for (const key in this.transFilesContents[this.langCode]) {
                 this.transFilesContents[this.langCode][key].meta.selected = false;

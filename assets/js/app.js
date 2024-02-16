@@ -21511,8 +21511,24 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       transFilesContents: {}
     };
   },
+  computed: {
+    // a computed getter
+    countSelectedTransNum: function countSelectedTransNum() {
+      // `this` points to the component instance
+      return this.countSelectedTrans;
+    }
+  },
   methods: {
     filterErrors: _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__.filterErrors,
+    countSelectedTrans: function countSelectedTrans() {
+      var countSelectedTransNum = 0;
+      for (var key in this.transFilesContents[this.langCode]) {
+        if (this.transFilesContents[this.langCode][key].meta.selected) {
+          countSelectedTransNum += 1;
+        }
+      }
+      return countSelectedTransNum;
+    },
     deselectTrans: function deselectTrans() {
       for (var key in this.transFilesContents[this.langCode]) {
         this.transFilesContents[this.langCode][key].meta.selected = false;
@@ -21906,7 +21922,9 @@ var _hoisted_23 = {
 var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "text-secondary"
 }, " ☐ ", -1 /* HOISTED */);
-var _hoisted_25 = [_hoisted_24];
+var _hoisted_25 = {
+  id: "countSelectedTransNum"
+};
 var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "app-tooltip"
 }, "Deselect all", -1 /* HOISTED */);
@@ -21994,7 +22012,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         return $options.deselectTrans && $options.deselectTrans.apply($options, arguments);
       }),
       "class": "error btn-icon"
-    }, [].concat(_hoisted_25)), _hoisted_26]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [Object.keys($data.duplicateKeyRecords).length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    }, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.countSelectedTransNum()) + ")", 1 /* TEXT */)]), _hoisted_26]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [Object.keys($data.duplicateKeyRecords).length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: 0,
       onClick: _cache[5] || (_cache[5] = function () {
         return $options.filterErrors && $options.filterErrors.apply($options, arguments);

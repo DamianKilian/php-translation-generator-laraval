@@ -12057,6 +12057,15 @@ textarea.form-control-lg {
   opacity: 1;
 }
 
+#countSelectedTransNum {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  line-height: 57px;
+  text-align: center;
+}
+
 .app-modal {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   border-radius: 6px;
