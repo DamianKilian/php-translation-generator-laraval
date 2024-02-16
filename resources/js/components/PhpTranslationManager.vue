@@ -78,7 +78,7 @@
                             <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
                             <div class="trans">
                                 <div class="actions">
-                                    <input @change="selectAction($event, arrkey)" class="select-action" type="checkbox">
+                                    <input @click="selectAction($event, arrkey)" class="select-action" type="checkbox">
                                 </div>
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
                                     class="form-control key-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
@@ -138,7 +138,7 @@ export default {
         },
         selectAction: function(e, arrkey){
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
-            keyRecord.meta.selected = !keyRecord.meta.selected;
+            keyRecord.meta.selected = e.target.checked;
         },
         getRandomInt: function (max) {
             return Math.floor(Math.random() * max);
