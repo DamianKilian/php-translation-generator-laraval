@@ -21536,8 +21536,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       this.lastTransSelectedOrginalKey = keyRecord.meta.orginalKey;
     },
     selectActionMulti: function selectActionMulti(e, arrkey) {
-      console.debug('selectActionMulti'); //mmmyyy
-      console.debug('' === this.lastTransSelectedOrginalKey); //mmmyyy
       if ('' === this.lastTransSelectedOrginalKey) {
         return;
       }
@@ -21551,7 +21549,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       var lowerKey = Math.min(arrkey, lastTransSelectedArrkey);
       var key = Math.max(arrkey, lastTransSelectedArrkey) + 1;
       while (key !== lowerKey) {
-        console.debug(key); //mmmyyy
         key--;
         this.transFilesContents[this.langCode][key].meta.selected = true;
       }
@@ -21950,7 +21947,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-bs-toggle": "tab",
       "data-bs-target": '#nav-' + _ctx.code,
       "data-lang-code": langCode
-    }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode), 11 /* TEXT, CLASS, PROPS */, _hoisted_2);
+    }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + " (" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.transFilesContents[langCode].length) + ")", 11 /* TEXT, CLASS, PROPS */, _hoisted_2);
   }), 256 /* UNKEYED_FRAGMENT */))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     onClick: _cache[8] || (_cache[8] = function () {
       return $options.confirmSaveClose && $options.confirmSaveClose.apply($options, arguments);

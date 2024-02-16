@@ -3,7 +3,8 @@
         <div class="nav nav-tabs" id="nav-tab">
             <button v-for="(langCode, index) in Object.keys(transFilesContents)" class="nav-link"
                 :class="{ 'active': index === 0 }" :set="code = langCode.replace('.json', '')" :id="'nav-' + code + '-tab'"
-                data-bs-toggle="tab" :data-bs-target="'#nav-' + code" :data-lang-code="langCode">{{ langCode }}</button>
+                data-bs-toggle="tab" :data-bs-target="'#nav-' + code" :data-lang-code="langCode">{{ langCode }}
+                ({{ transFilesContents[langCode].length }})</button>
         </div>
     </nav>
     <div @click="confirmSaveClose" class="tab-content" id="nav-tabContent">
@@ -163,8 +164,6 @@ export default {
             this.lastTransSelectedOrginalKey = keyRecord.meta.orginalKey;
         },
         selectActionMulti: function (e, arrkey) {
-            console.debug('selectActionMulti');//mmmyyy
-            console.debug('' === this.lastTransSelectedOrginalKey);//mmmyyy
             if ('' === this.lastTransSelectedOrginalKey) {
                 return;
             }
@@ -178,7 +177,6 @@ export default {
             var lowerKey = Math.min(arrkey, lastTransSelectedArrkey);
             var key = Math.max(arrkey, lastTransSelectedArrkey) + 1;
             while (key !== lowerKey) {
-                console.debug(key);//mmmyyy
                 key--;
                 this.transFilesContents[this.langCode][key].meta.selected = true;
             }
