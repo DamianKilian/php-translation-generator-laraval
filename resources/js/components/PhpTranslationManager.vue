@@ -59,6 +59,14 @@
                                 </div>
                             </div>
                             <div class="app-btn">
+                                <div @click="deselectTrans" class="error btn-icon">
+                                    <span class="text-secondary">
+                                        &#9744;
+                                    </span>
+                                </div>
+                                <div class="app-tooltip">Deselect all</div>
+                            </div>
+                            <div class="app-btn">
                                 <div @click="filterErrors" class="error btn-icon"
                                     v-if="Object.keys(duplicateKeyRecords).length !== 0 || filterErrorsOn">
                                     <span :class="{ 'text-success': Object.keys(duplicateKeyRecords).length === 0 }">
@@ -133,6 +141,11 @@ export default {
     },
     methods: {
         filterErrors,
+        deselectTrans: function () {
+            for (const key in this.transFilesContents[this.langCode]) {
+                this.transFilesContents[this.langCode][key].meta.selected = false;
+            }
+        },
         closeModal: function () {
             this.modalMsg = {
                 msg: '',
