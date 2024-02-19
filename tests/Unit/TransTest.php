@@ -77,9 +77,12 @@ class TransTest extends TestCase
     {
         $phpTranslationManagerService = new PhpTranslationManagerService('');
         $testArrWrapped = [
+            ['key' => 'kdel1', 'val' => 'vdel1', 'meta' => ['deleted' => true],],
             ['key' => 'k1', 'val' => 'v1'],
+            ['key' => 'kdel2', 'val' => 'vdel2', 'meta' => ['deleted' => true],],
             ['key' => 'k2', 'val' => 'v2'],
             ['key' => 'k3', 'val' => 'v3'],
+            ['key' => 'kdel2', 'val' => 'vdel2', 'meta' => ['deleted' => true],],
         ];
         $testArr = [
             'k1' => 'v1',
