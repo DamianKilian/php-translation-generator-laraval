@@ -71,6 +71,9 @@ class PhpTranslationManagerService
     {
         $newTransFilesContent = [];
         foreach ($trans as $value) {
+            if($value['meta']['deleted']){
+                continue;
+            }
             if (isset($newTransFilesContent[$value['key']])) {
                 throw new \Exception(self::ERR_MSG);
             }
