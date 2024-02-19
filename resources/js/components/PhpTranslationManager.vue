@@ -64,9 +64,17 @@
                                     <span class="text-secondary">
                                         &#9744;
                                     </span>
-                                    <div id="countSelectedTransNum">({{ countSelectedTransNum() }})</div>
+                                    <div id="countSelectedTransNum">({{ countSelectedTransNum }})</div>
                                 </div>
                                 <div class="app-tooltip">Deselect all</div>
+                            </div>
+                            <div class="app-btn">
+                                <div @click="deleteTrans" class="error btn-icon">
+                                    <span class="text-dangerous">
+                                        &#10005;
+                                    </span>
+                                </div>
+                                <div class="app-tooltip">Delete</div>
                             </div>
                             <div class="app-btn">
                                 <div @click="filterErrors" class="error btn-icon"
@@ -82,7 +90,8 @@
                 </div>
                 <div class="flex-grow-1 pb-5">
                     <div v-for="(val, arrkey) in transFileContent" class="row"
-                        :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new }" :key="val.meta.orginalKey">
+                        :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new, 'bg-danger': val.meta.deleted }"
+                        :key="val.meta.orginalKey">
                         <div class="col p-2"
                             :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white border-3': '' !== val.meta.error }">
                             <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
@@ -143,19 +152,25 @@ export default {
     },
     computed: {
         countSelectedTransNum() {
-            return this.countSelectedTrans;
+            return this.getSelectedTrans().length;
         }
     },
     methods: {
         filterErrors,
-        countSelectedTrans: function () {
-            var countSelectedTransNum = 0;
+        deleteTrans: function () {
+            var selectedTrans = this.getSelectedTrans();
+            for (const key in selectedTrans) {
+                selectedTrans[key].meta.deleted = true;
+            }
+        },
+        getSelectedTrans: function () {
+            var selectedTrans = [];
             for (const key in this.transFilesContents[this.langCode]) {
                 if (this.transFilesContents[this.langCode][key].meta.selected) {
-                    countSelectedTransNum += 1;
+                    selectedTrans.push(this.transFilesContents[this.langCode][key]);
                 }
             }
-            return countSelectedTransNum;
+            return selectedTrans;
         },
         deselectTrans: function () {
             for (const key in this.transFilesContents[this.langCode]) {
