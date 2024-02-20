@@ -60,7 +60,7 @@
                                 </div>
                             </div>
                             <div class="app-btn">
-                                <div @click="deselectTrans" class="error btn-icon">
+                                <div @click="deselectTrans" class="btn-icon">
                                     <span class="text-secondary">
                                         &#9744;
                                     </span>
@@ -69,7 +69,7 @@
                                 <div class="app-tooltip">Deselect all</div>
                             </div>
                             <div class="app-btn">
-                                <div @click="deleteTrans" class="error btn-icon">
+                                <div @click="deleteTrans" class="btn-icon">
                                     <span class="text-dangerous">
                                         &#10005;
                                     </span>
@@ -77,7 +77,23 @@
                                 <div class="app-tooltip">Delete</div>
                             </div>
                             <div class="app-btn">
-                                <div @click="filterErrors" class="error btn-icon"
+                                <div @click="backForthHistory(true)" class="btn-icon">
+                                    <span :class="{ 'text-secondary': historyCurrKeyGlobal < 1 }">
+                                        &#8634;
+                                    </span>
+                                </div>
+                                <div class="app-tooltip">Back</div>
+                            </div>
+                            <div class="app-btn">
+                                <div @click="backForthHistory(false)" class="btn-icon">
+                                    <span :class="{ 'text-secondary': historyCurrKeyGlobal === historyLastKeyGlobal }">
+                                        &#8635;
+                                    </span>
+                                </div>
+                                <div class="app-tooltip">Forth</div>
+                            </div>
+                            <div class="app-btn">
+                                <div @click="filterErrors" class="error btn-icon red"
                                     v-if="Object.keys(duplicateKeyRecords).length !== 0 || filterErrorsOn">
                                     <span :class="{ 'text-success': Object.keys(duplicateKeyRecords).length === 0 }">
                                         &#9888;
@@ -135,6 +151,12 @@ export default {
     },
     data() {
         return {
+            history: {
+                transFilesContents: {},
+            },
+            historyStorageBlock: false,
+            historyLastKeyGlobal: -1,
+            historyCurrKeyGlobal: -1,
             lastTransSelectedOrginalKey: '',
             textareaInputBlocked: true,
             modalMsg: {
@@ -157,6 +179,51 @@ export default {
     },
     methods: {
         filterErrors,
+        backForthHistory: function (back) {
+            if ((back ? this.historyCurrKeyGlobal < 1 : this.historyCurrKeyGlobal === this.historyLastKeyGlobal)) {
+                return;
+            }
+            this.historyStorageBlock = true;
+            this.historyCurrKeyGlobal = this.historyCurrKeyGlobal + (back ? -1 : 1);
+            for (const property in this.history) {
+                var propertyStr = this.history[property][this.langCode][this.historyCurrKeyGlobal];
+                if (propertyStr) {
+                    this[property][this.langCode] = JSON.parse(propertyStr);
+                }
+            }
+        },
+        storeHistory: function () {
+            if (this.historyStorageBlock) {
+                this.historyStorageBlock = false;
+                return;
+            }
+            var history = this.history;
+            var historyKeyGlobalInc = false;
+            for (const property in history) {
+                if (typeof history[property][this.langCode] === 'undefined') {
+                    history[property][this.langCode] = [];
+                }
+                var propertyStr = JSON.stringify(this[property][this.langCode]);
+                if (this.historyCurrKeyGlobal < 0 || history[property][this.langCode][this.historyCurrKeyGlobal] !== propertyStr) {
+                    history[property][this.langCode].push(propertyStr);
+                    historyKeyGlobalInc = true;
+                } else {
+                    history[property][this.langCode].push(null);
+                }
+            }
+            if (historyKeyGlobalInc) {
+                if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
+                    for (const property in history) {
+                        history[property][this.langCode] = history[property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
+                    }
+                }
+                this.historyLastKeyGlobal = ++this.historyCurrKeyGlobal;
+            } else {
+                for (const property in history) {
+                    history[property][this.langCode].pop();
+                }
+            }
+        },
         deleteTrans: function () {
             var selectedTrans = this.getSelectedTrans();
             for (const key in selectedTrans) {
@@ -379,6 +446,8 @@ export default {
         if (!this.langCode) {
             this.gettingLangCodeFromTabs();
         }
+        this.storeHistory();
+
         console.debug('updated');//mmmyyy
         // console.debug(this.duplicateKeyRecords);//mmmyyy
     }

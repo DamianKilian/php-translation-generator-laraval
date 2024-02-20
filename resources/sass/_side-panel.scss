@@ -27,10 +27,12 @@
                 filter: invert(60%);
             }
         }
+        &.red{
+            color: red;
+        }
         span {
             font-size: 70px;
             line-height: 60px;
-            color: red;
         }
     }
 }

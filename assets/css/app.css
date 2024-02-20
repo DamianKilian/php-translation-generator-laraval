@@ -12001,10 +12001,12 @@ textarea.form-control-lg {
 .side-panel .btn-icon:hover span {
   filter: invert(60%);
 }
+.side-panel .btn-icon.red {
+  color: red;
+}
 .side-panel .btn-icon span {
   font-size: 70px;
   line-height: 60px;
-  color: red;
 }
 
 .app-btn {
