@@ -64,7 +64,7 @@
                                     <span class="text-secondary">
                                         &#9744;
                                     </span>
-                                    <div id="countSelectedTransNum">({{ countSelectedTransNum }})</div>
+                                    <div class="numOnBtn">({{ countSelectedTransNum }})</div>
                                 </div>
                                 <div class="app-tooltip">Deselect all</div>
                             </div>
@@ -81,6 +81,7 @@
                                     <span :class="{ 'text-secondary': historyCurrKeyGlobal < 1 }">
                                         &#8634;
                                     </span>
+                                    <div class="numOnBtn">({{ historyCurrKeyGlobal }})</div>
                                 </div>
                                 <div class="app-tooltip">Back</div>
                             </div>
@@ -89,6 +90,7 @@
                                     <span :class="{ 'text-secondary': historyCurrKeyGlobal === historyLastKeyGlobal }">
                                         &#8635;
                                     </span>
+                                    <div class="numOnBtn">({{ historyLastKeyGlobal - historyCurrKeyGlobal }})</div>
                                 </div>
                                 <div class="app-tooltip">Forth</div>
                             </div>

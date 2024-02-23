@@ -12059,7 +12059,7 @@ textarea.form-control-lg {
   opacity: 1;
 }
 
-#countSelectedTransNum {
+.numOnBtn {
   position: absolute;
   top: 0;
   left: 0;
