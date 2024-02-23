@@ -21508,7 +21508,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         msg: '',
         type: ''
       },
-      newTransKeys: [],
       filterErrorsOn: false,
       duplicateKeyRecords: [],
       langCode: null,
@@ -21572,14 +21571,20 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     deleteTrans: function deleteTrans() {
       var selectedTrans = this.getSelectedTrans();
       for (var key in selectedTrans) {
-        selectedTrans[key].meta.deleted = true;
+        if (selectedTrans[key].meta["new"]) {
+          this.transFilesContents[this.langCode].splice(selectedTrans[key].meta.currentKey, 1);
+        } else {
+          selectedTrans[key].meta.deleted = true;
+        }
       }
     },
     getSelectedTrans: function getSelectedTrans() {
       var selectedTrans = [];
       for (var key in this.transFilesContents[this.langCode]) {
-        if (this.transFilesContents[this.langCode][key].meta.selected) {
-          selectedTrans.push(this.transFilesContents[this.langCode][key]);
+        var trans = this.transFilesContents[this.langCode][key];
+        if (trans.meta.selected) {
+          trans.currentKey = key;
+          selectedTrans.push(trans);
         }
       }
       return selectedTrans;
@@ -21643,7 +21648,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         val: 'new'
       }]);
       this.getTransFilesContents(data, true);
-      this.newTransKeys.push(newKey);
     },
     saveTransFiles: function saveTransFiles() {
       var _this = this;

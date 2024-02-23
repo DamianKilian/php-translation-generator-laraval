@@ -165,7 +165,6 @@ export default {
                 msg: '',
                 type: '',
             },
-            newTransKeys: [],
             filterErrorsOn: false,
             duplicateKeyRecords: [],
             langCode: null,
@@ -229,14 +228,20 @@ export default {
         deleteTrans: function () {
             var selectedTrans = this.getSelectedTrans();
             for (const key in selectedTrans) {
-                selectedTrans[key].meta.deleted = true;
+                if (selectedTrans[key].meta.new) {
+                    this.transFilesContents[this.langCode].splice(selectedTrans[key].meta.currentKey, 1);
+                } else {
+                    selectedTrans[key].meta.deleted = true;
+                }
             }
         },
         getSelectedTrans: function () {
             var selectedTrans = [];
             for (const key in this.transFilesContents[this.langCode]) {
-                if (this.transFilesContents[this.langCode][key].meta.selected) {
-                    selectedTrans.push(this.transFilesContents[this.langCode][key]);
+                var trans = this.transFilesContents[this.langCode][key];
+                if (trans.meta.selected) {
+                    trans.currentKey = key;
+                    selectedTrans.push(trans);
                 }
             }
             return selectedTrans;
@@ -301,7 +306,6 @@ export default {
                 }]
             };
             this.getTransFilesContents(data, true);
-            this.newTransKeys.push(newKey);
         },
         saveTransFiles: function () {
             var data = {};
