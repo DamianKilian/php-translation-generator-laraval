@@ -12011,6 +12011,9 @@ textarea.form-control-lg {
 
 .app-btn {
   position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+       user-select: none;
 }
 .app-btn .app-tooltip {
   visibility: hidden;

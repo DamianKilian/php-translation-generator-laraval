@@ -27,7 +27,7 @@
                 filter: invert(60%);
             }
         }
-        &.red{
+        &.red {
             color: red;
         }
         span {
@@ -39,6 +39,9 @@
 
 .app-btn {
     position: relative;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     .app-tooltip {
         visibility: hidden;
         width: 120px;
