@@ -21568,14 +21568,22 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         }
       }
     },
-    deleteTrans: function deleteTrans() {
+    deleteTrans: function deleteTrans(e) {
+      var undelete = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var selectedTrans = this.getSelectedTrans();
+      var selectedTransDeleted = [];
       for (var key in selectedTrans) {
+        if (!undelete && selectedTrans[key].meta.deleted) {
+          selectedTransDeleted.push(selectedTrans[key]);
+        }
         if (selectedTrans[key].meta["new"]) {
           this.transFilesContents[this.langCode].splice(selectedTrans[key].meta.currentKey, 1);
         } else {
-          selectedTrans[key].meta.deleted = true;
+          selectedTrans[key].meta.deleted = !undelete;
         }
+      }
+      if (!undelete && selectedTransDeleted.length === selectedTrans.length) {
+        this.deleteTrans(e, true);
       }
     },
     getSelectedTrans: function getSelectedTrans() {
@@ -22101,8 +22109,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }),
       "class": "btn-icon"
     }, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.countSelectedTransNum) + ")", 1 /* TEXT */)]), _hoisted_26]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-      onClick: _cache[5] || (_cache[5] = function () {
-        return $options.deleteTrans && $options.deleteTrans.apply($options, arguments);
+      onClick: _cache[5] || (_cache[5] = function ($event) {
+        return $options.deleteTrans();
       }),
       "class": "btn-icon"
     }, [].concat(_hoisted_29)), _hoisted_30]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_31, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {

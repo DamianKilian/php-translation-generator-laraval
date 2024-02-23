@@ -69,7 +69,7 @@
                                 <div class="app-tooltip">Deselect all</div>
                             </div>
                             <div class="app-btn">
-                                <div @click="deleteTrans" class="btn-icon">
+                                <div @click="deleteTrans()" class="btn-icon">
                                     <span class="text-dangerous">
                                         &#10005;
                                     </span>
@@ -225,14 +225,21 @@ export default {
                 }
             }
         },
-        deleteTrans: function () {
+        deleteTrans: function (e, undelete = false) {
             var selectedTrans = this.getSelectedTrans();
+            var selectedTransDeleted = [];
             for (const key in selectedTrans) {
+                if (!undelete && selectedTrans[key].meta.deleted) {
+                    selectedTransDeleted.push(selectedTrans[key]);
+                }
                 if (selectedTrans[key].meta.new) {
                     this.transFilesContents[this.langCode].splice(selectedTrans[key].meta.currentKey, 1);
                 } else {
-                    selectedTrans[key].meta.deleted = true;
+                    selectedTrans[key].meta.deleted = !undelete;
                 }
+            }
+            if (!undelete && selectedTransDeleted.length === selectedTrans.length) {
+                this.deleteTrans(e, true);
             }
         },
         getSelectedTrans: function () {
