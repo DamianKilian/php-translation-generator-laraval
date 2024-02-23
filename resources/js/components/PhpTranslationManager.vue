@@ -205,6 +205,11 @@ export default {
                 }
                 var propertyStr = JSON.stringify(this[property][this.langCode]);
                 if (this.historyCurrKeyGlobal < 0 || history[property][this.langCode][this.historyCurrKeyGlobal] !== propertyStr) {
+                    if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
+                        for (const property in history) {
+                            history[property][this.langCode] = history[property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
+                        }
+                    }
                     history[property][this.langCode].push(propertyStr);
                     historyKeyGlobalInc = true;
                 } else {
@@ -212,11 +217,6 @@ export default {
                 }
             }
             if (historyKeyGlobalInc) {
-                if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
-                    for (const property in history) {
-                        history[property][this.langCode] = history[property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
-                    }
-                }
                 this.historyLastKeyGlobal = ++this.historyCurrKeyGlobal;
             } else {
                 for (const property in history) {

@@ -21550,6 +21550,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         }
         var propertyStr = JSON.stringify(this[property][this.langCode]);
         if (this.historyCurrKeyGlobal < 0 || history[property][this.langCode][this.historyCurrKeyGlobal] !== propertyStr) {
+          if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
+            for (var _property in history) {
+              history[_property][this.langCode] = history[_property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
+            }
+          }
           history[property][this.langCode].push(propertyStr);
           historyKeyGlobalInc = true;
         } else {
@@ -21557,11 +21562,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         }
       }
       if (historyKeyGlobalInc) {
-        if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
-          for (var _property in history) {
-            history[_property][this.langCode] = history[_property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
-          }
-        }
         this.historyLastKeyGlobal = ++this.historyCurrKeyGlobal;
       } else {
         for (var _property2 in history) {
