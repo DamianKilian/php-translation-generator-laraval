@@ -42,21 +42,6 @@
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    .app-tooltip {
-        visibility: hidden;
-        width: 120px;
-        background-color: black;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px 0;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        height: 2rem;
-        left: 65px;
-        margin: auto;
-    }
     &:hover {
         .app-tooltip {
             visibility: visible;

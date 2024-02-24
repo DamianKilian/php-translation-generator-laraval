@@ -12015,21 +12015,6 @@ textarea.form-control-lg {
   -moz-user-select: none;
        user-select: none;
 }
-.app-btn .app-tooltip {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  height: 2rem;
-  left: 65px;
-  margin: auto;
-}
 .app-btn:hover .app-tooltip {
   visibility: visible;
 }
@@ -12120,4 +12105,44 @@ textarea.form-control-lg {
   height: 25px;
   margin: 5px;
   display: block;
+}
+
+.btns-small > * {
+  width: 100%;
+  text-align: center;
+  font-size: 23px;
+  line-height: 19px;
+  cursor: pointer;
+}
+.btns-small:hover .icon {
+  filter: invert(60%);
+}
+
+.app-tooltip {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 2rem;
+  left: 65px;
+  margin: auto;
+}
+
+.btn-small {
+  position: relative;
+}
+.btn-small .app-tooltip {
+  width: 90px;
+  height: 1.8rem;
+  left: 35px;
+  font-size: 0.7rem;
+}
+.btn-small:hover .app-tooltip {
+  visibility: visible;
 }

@@ -21570,20 +21570,31 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     },
     deleteTrans: function deleteTrans(e) {
       var undelete = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      var selectedTrans = this.getSelectedTrans();
-      var selectedTransDeleted = [];
-      for (var key in selectedTrans) {
-        if (!undelete && selectedTrans[key].meta.deleted) {
-          selectedTransDeleted.push(selectedTrans[key]);
+      var selectedTransProp = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      if (!Array.isArray(selectedTransProp) && Object.keys(selectedTransProp).length) {
+        var selectedTrans = [];
+        for (var key in selectedTransProp) {
+          selectedTransProp[key].meta.currentKey = key;
+          selectedTrans.push(selectedTransProp[key]);
         }
-        if (selectedTrans[key].meta["new"]) {
-          this.transFilesContents[this.langCode].splice(selectedTrans[key].meta.currentKey, 1);
+      } else if (!selectedTransProp.length) {
+        var selectedTrans = this.getSelectedTrans();
+      } else {
+        var selectedTrans = selectedTransProp;
+      }
+      var selectedTransDeleted = [];
+      for (var _key in selectedTrans) {
+        if (!undelete && selectedTrans[_key].meta.deleted) {
+          selectedTransDeleted.push(selectedTrans[_key]);
+        }
+        if (selectedTrans[_key].meta["new"]) {
+          this.transFilesContents[this.langCode].splice(selectedTrans[_key].meta.currentKey, 1);
         } else {
-          selectedTrans[key].meta.deleted = !undelete;
+          selectedTrans[_key].meta.deleted = !undelete;
         }
       }
       if (!undelete && selectedTransDeleted.length === selectedTrans.length) {
-        this.deleteTrans(e, true);
+        this.deleteTrans(e, true, selectedTrans);
       }
     },
     getSelectedTrans: function getSelectedTrans() {
@@ -21624,10 +21635,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         return;
       }
       var lastTransSelectedArrkey = null;
-      for (var _key in this.transFilesContents[this.langCode]) {
-        var orginalKey = this.transFilesContents[this.langCode][_key].meta.orginalKey;
+      for (var _key2 in this.transFilesContents[this.langCode]) {
+        var orginalKey = this.transFilesContents[this.langCode][_key2].meta.orginalKey;
         if (orginalKey === this.lastTransSelectedOrginalKey) {
-          lastTransSelectedArrkey = _key;
+          lastTransSelectedArrkey = _key2;
         }
       }
       var lowerKey = Math.min(arrkey, lastTransSelectedArrkey);
@@ -21898,6 +21909,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   render: () => (/* binding */ render)
 /* harmony export */ });
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : String(i); }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var _hoisted_1 = {
   "class": "nav nav-tabs",
@@ -21999,9 +22014,7 @@ var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 var _hoisted_27 = {
   "class": "app-btn"
 };
-var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "text-dangerous"
-}, " ✕ ", -1 /* HOISTED */);
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, " ✕ ", -1 /* HOISTED */);
 var _hoisted_29 = [_hoisted_28];
 var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "app-tooltip"
@@ -22044,11 +22057,22 @@ var _hoisted_42 = {
   "class": "actions"
 };
 var _hoisted_43 = ["onChange", "onUpdate:modelValue", "onClick"];
-var _hoisted_44 = ["onInput"];
-var _hoisted_45 = {
+var _hoisted_44 = {
+  "class": "d-flex flex-column btns-small"
+};
+var _hoisted_45 = ["onClick"];
+var _hoisted_46 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "icon"
+}, "✕", -1 /* HOISTED */);
+var _hoisted_47 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "app-tooltip"
+}, "Delete", -1 /* HOISTED */);
+var _hoisted_48 = [_hoisted_46, _hoisted_47];
+var _hoisted_49 = ["onInput"];
+var _hoisted_50 = {
   "class": "trans"
 };
-var _hoisted_46 = ["onInput"];
+var _hoisted_51 = ["onInput"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
@@ -22166,7 +22190,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         }, ["shift"]),
         "class": "select-action",
         type: "checkbox"
-      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_43), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, val['meta'].selected]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_43), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, val['meta'].selected]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_44, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+        "class": "p-2 btn-small",
+        onClick: function onClick($event) {
+          return $options.deleteTrans(_ctx.e, false, _defineProperty({}, arrkey, val));
+        }
+      }, [].concat(_hoisted_48), 8 /* PROPS */, _hoisted_45), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <div class=\"p-2 btn-small\">&#10560;</div> ")])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
           'text-danger': '' !== val.meta.error
         }, "form-control key-textarea p-3"]),
@@ -22177,11 +22206,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'key');
         }
-      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_44)])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_49)])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
-      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_45, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_50, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": "form-control val-textarea p-3",
         rows: "3",
         onFocus: _cache[10] || (_cache[10] = function ($event) {
@@ -22190,7 +22219,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'val');
         }
-      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_46)])], 2 /* CLASS */)], 2 /* CLASS */);
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_51)])], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
     key: 0,

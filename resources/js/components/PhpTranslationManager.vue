@@ -70,7 +70,7 @@
                             </div>
                             <div class="app-btn">
                                 <div @click="deleteTrans()" class="btn-icon">
-                                    <span class="text-dangerous">
+                                    <span>
                                         &#10005;
                                     </span>
                                 </div>
@@ -118,6 +118,13 @@
                                     <input @change="selectAction($event, arrkey)" v-model="val['meta'].selected"
                                         @click.shift="selectActionMulti($event, arrkey)" class="select-action"
                                         type="checkbox">
+                                    <div class="d-flex flex-column btns-small">
+                                        <div class="p-2 btn-small" @click="deleteTrans(e, false, { [arrkey]: val })">
+                                            <div class="icon">&#10005;</div>
+                                            <div class="app-tooltip">Delete</div>
+                                        </div>
+                                        <!-- <div class="p-2 btn-small">&#10560;</div> -->
+                                    </div>
                                 </div>
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
                                     class="form-control key-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
@@ -225,8 +232,18 @@ export default {
                 }
             }
         },
-        deleteTrans: function (e, undelete = false) {
-            var selectedTrans = this.getSelectedTrans();
+        deleteTrans: function (e, undelete = false, selectedTransProp = {}) {
+            if (!Array.isArray(selectedTransProp) && Object.keys(selectedTransProp).length) {
+                var selectedTrans = [];
+                for (const key in selectedTransProp) {
+                    selectedTransProp[key].meta.currentKey = key;
+                    selectedTrans.push(selectedTransProp[key]);
+                }
+            } else if (!selectedTransProp.length) {
+                var selectedTrans = this.getSelectedTrans();
+            } else {
+                var selectedTrans = selectedTransProp;
+            }
             var selectedTransDeleted = [];
             for (const key in selectedTrans) {
                 if (!undelete && selectedTrans[key].meta.deleted) {
@@ -239,7 +256,7 @@ export default {
                 }
             }
             if (!undelete && selectedTransDeleted.length === selectedTrans.length) {
-                this.deleteTrans(e, true);
+                this.deleteTrans(e, true, selectedTrans);
             }
         },
         getSelectedTrans: function () {
