@@ -217,14 +217,16 @@ export default {
             var row = e.target.closest('.row');
             var valTextarea = row.querySelector('.val-textarea');
             var keyTextarea = row.querySelector('.key-textarea');
-            keyRecord.meta = this.getMeta(orginalVal, orginalKey);
-            if (valTextarea.value !== orginalVal) {
-                valTextarea.value = orginalVal;
-                valTextarea.dispatchEvent(new Event('input'));
-            }
-            if (keyTextarea.value !== orginalKey) {
-                keyTextarea.value = orginalKey;
-                keyTextarea.dispatchEvent(new Event('input'));
+            if (valTextarea.value !== orginalVal || keyTextarea.value !== orginalKey) {
+                keyRecord.meta = this.getMeta(orginalVal, orginalKey);
+                if (valTextarea.value !== orginalVal) {
+                    valTextarea.value = orginalVal;
+                    valTextarea.dispatchEvent(new Event('input'));
+                }
+                if (keyTextarea.value !== orginalKey) {
+                    keyTextarea.value = orginalKey;
+                    keyTextarea.dispatchEvent(new Event('input'));
+                }
             }
         },
         backForthHistory: function (back) {
