@@ -21529,9 +21529,17 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       var orginalVal = keyRecord.meta.orginalVal;
       var orginalKey = keyRecord.meta.orginalKey;
       var row = e.target.closest('.row');
+      var valTextarea = row.querySelector('.val-textarea');
+      var keyTextarea = row.querySelector('.key-textarea');
       keyRecord.meta = this.getMeta(orginalVal, orginalKey);
-      keyRecord.val = row.querySelector('.val-textarea').value = orginalVal;
-      keyRecord.key = row.querySelector('.key-textarea').value = orginalKey;
+      if (valTextarea.value !== orginalVal) {
+        valTextarea.value = orginalVal;
+        valTextarea.dispatchEvent(new Event('input'));
+      }
+      if (keyTextarea.value !== orginalKey) {
+        keyTextarea.value = orginalKey;
+        keyTextarea.dispatchEvent(new Event('input'));
+      }
     },
     backForthHistory: function backForthHistory(back) {
       if (back ? this.historyCurrKeyGlobal < 1 : this.historyCurrKeyGlobal === this.historyLastKeyGlobal) {
@@ -21678,9 +21686,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }]);
       this.getTransFilesContents(data, true);
     },
-    searchTrans: function searchTrans() {
-      console.debug('searchTrans'); //mmmyyy
-    },
+    searchTrans: function searchTrans() {},
     saveTransFiles: function saveTransFiles() {
       var _this = this;
       var data = {};
