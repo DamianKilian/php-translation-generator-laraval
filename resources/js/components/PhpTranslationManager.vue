@@ -123,7 +123,10 @@
                                             <div class="icon">&#10005;</div>
                                             <div class="app-tooltip">Delete</div>
                                         </div>
-                                        <!-- <div class="p-2 btn-small">&#10560;</div> -->
+                                        <div class="p-2 btn-small" @click="resetTrans($event, arrkey)">
+                                            <div class="icon">&#10560;</div>
+                                            <div class="app-tooltip">Reset</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
@@ -187,6 +190,15 @@ export default {
     },
     methods: {
         filterErrors,
+        resetTrans: function (e, arrkey) {
+            var keyRecord = this.transFilesContents[this.langCode][arrkey];
+            var orginalVal = keyRecord.meta.orginalVal;
+            var orginalKey = keyRecord.meta.orginalKey;
+            var row = e.target.closest('.row');
+            keyRecord.meta = this.getMeta(orginalVal, orginalKey);
+            keyRecord.val = row.querySelector('.val-textarea').value = orginalVal;
+            keyRecord.key = row.querySelector('.key-textarea').value = orginalKey;
+        },
         backForthHistory: function (back) {
             if ((back ? this.historyCurrKeyGlobal < 1 : this.historyCurrKeyGlobal === this.historyLastKeyGlobal)) {
                 return;

@@ -1,12 +1,19 @@
-
-
 // Variables
 @import 'variables';
 
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
 
-
 @import 'side-panel';
 @import 'modal';
 @import 'trans-row';
+
+.app-btn,
+.btn-small {
+    .btn-icon,
+    .icon {
+        &:hover {
+            filter: invert(60%);
+        }
+    }
+}

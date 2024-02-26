@@ -11997,10 +11997,6 @@ textarea.form-control-lg {
   margin-bottom: 10px;
   text-align: center;
 }
-.side-panel .btn-icon:hover svg,
-.side-panel .btn-icon:hover span {
-  filter: invert(60%);
-}
 .side-panel .btn-icon.red {
   color: red;
 }
@@ -12114,9 +12110,6 @@ textarea.form-control-lg {
   line-height: 19px;
   cursor: pointer;
 }
-.btns-small:hover .icon {
-  filter: invert(60%);
-}
 
 .app-tooltip {
   visibility: hidden;
@@ -12145,4 +12138,11 @@ textarea.form-control-lg {
 }
 .btn-small:hover .app-tooltip {
   visibility: visible;
+}
+
+.app-btn .btn-icon:hover,
+.app-btn .icon:hover,
+.btn-small .btn-icon:hover,
+.btn-small .icon:hover {
+  filter: invert(60%);
 }
