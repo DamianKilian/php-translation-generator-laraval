@@ -44,9 +44,9 @@
 }
 
 .btns {
-    .save-wrapper {
+    .btn-confirm-wrapper {
         position: relative;
-        .confirm-save {
+        .confirm {
             display: none;
             opacity: 0 50ms ease;
             transition: opacity;

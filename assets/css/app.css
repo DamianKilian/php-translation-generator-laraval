@@ -12015,10 +12015,10 @@ textarea.form-control-lg {
   visibility: visible;
 }
 
-.btns .save-wrapper {
+.btns .btn-confirm-wrapper {
   position: relative;
 }
-.btns .save-wrapper .confirm-save {
+.btns .btn-confirm-wrapper .confirm {
   display: none;
   opacity: 0 50ms ease;
   transition: opacity;
@@ -12029,7 +12029,7 @@ textarea.form-control-lg {
   width: 200px;
   height: 64px;
 }
-.btns .save-wrapper .confirm-save button {
+.btns .btn-confirm-wrapper .confirm button {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -12038,7 +12038,7 @@ textarea.form-control-lg {
   right: 0;
   left: 0;
 }
-.btns .save-wrapper .confirm-save.open {
+.btns .btn-confirm-wrapper .confirm.open {
   display: block;
   opacity: 1;
 }

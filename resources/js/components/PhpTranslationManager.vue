@@ -7,7 +7,7 @@
                 ({{ transFilesContents[langCode].length }})</button>
         </div>
     </nav>
-    <div @click="confirmSaveClose" class="tab-content" id="nav-tabContent">
+    <div @click="confirmClose" class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show pt-3 pe-4" v-for="(transFileContent, langCode) in transFilesContents"
             :class="{ 'active': langCode === Object.keys(transFilesContents)[0] }"
             :id="'nav-' + langCode.replace('.json', '')">
@@ -34,15 +34,28 @@
                                 <div class="app-tooltip">Settings</div>
                             </div>
                             <div class="app-btn">
-                                <div @click="addNewTrans" class="new btn-icon">
-                                    <span class="text-primary">&plusb;</span>
+                                <div class="app-tooltip">Search</div>
+                                <div class="btn-confirm-wrapper">
+                                    <div @click="confirmClose($event, true); confirmSearchOpen = !confirmSearchOpen"
+                                        class="search btn-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
+                                            fill="none" stroke="#417505" stroke-width="2.5" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </div>
+                                    <div :class="{ open: confirmSearchOpen }" class="confirm text-bg-dark p-2">
+                                        <button @click="searchTrans" type="button"
+                                            class="btn btn-primary float-end">Search</button>
+                                    </div>
                                 </div>
-                                <div class="app-tooltip">Add new trans</div>
                             </div>
                             <div class="app-btn">
                                 <div class="app-tooltip">Save</div>
-                                <div class="save-wrapper">
-                                    <div @click="confirmSaveOpen = !confirmSaveOpen" class="save btn-icon">
+                                <div class="btn-confirm-wrapper">
+                                    <div @click="confirmClose($event, true); confirmSaveOpen = !confirmSaveOpen"
+                                        class="save btn-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
                                             fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
                                             stroke-linejoin="round">
@@ -52,12 +65,18 @@
                                             <polyline points="7 3 7 8 15 8"></polyline>
                                         </svg>
                                     </div>
-                                    <div :class="{ open: confirmSaveOpen }" class="confirm-save text-bg-dark p-2">
+                                    <div :class="{ open: confirmSaveOpen }" class="confirm text-bg-dark p-2">
                                         <button @click="saveTransFiles" type="button" class="btn btn-primary float-end">
                                             Save for "{{ langCode }}"
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="app-btn">
+                                <div @click="addNewTrans" class="new btn-icon">
+                                    <span class="text-primary">&plusb;</span>
+                                </div>
+                                <div class="app-tooltip">Add new trans</div>
                             </div>
                             <div class="app-btn">
                                 <div @click="deselectTrans" class="btn-icon">
@@ -180,6 +199,7 @@ export default {
             langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
+            confirmSearchOpen: false,
             transFilesContents: {},
         }
     },
@@ -343,6 +363,9 @@ export default {
             };
             this.getTransFilesContents(data, true);
         },
+        searchTrans: function () {
+            console.debug('searchTrans');//mmmyyy
+        },
         saveTransFiles: function () {
             var data = {};
             data[this.langCode] = this.transFilesContents[this.langCode];
@@ -407,8 +430,9 @@ export default {
                 }
             }
         },
-        confirmSaveClose: function (e) {
-            if (!e.target.closest(".save-wrapper")) {
+        confirmClose: function (e, force = false) {
+            if (force || !e.target.closest(".btn-confirm-wrapper")) {
+                this.confirmSearchOpen = false;
                 this.confirmSaveOpen = false;
             }
         },
