@@ -149,15 +149,15 @@
                                     </div>
                                 </div>
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
-                                    class="form-control key-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
-                                    @input="e => { translationModified(e, arrkey, 'key') }">{{ val['key'] }}</textarea>
+                                    class="form-control key-textarea key-val-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
+                                    @input="e => { translationModified(e, arrkey, 'key') }" :data-arrkey="arrkey" data-type="key">{{ val['key'] }}</textarea>
                             </div>
                         </div>
                         <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
                             <div class="trans">
-                                <textarea class="form-control val-textarea p-3" rows="3"
+                                <textarea class="form-control val-textarea key-val-textarea p-3" rows="3"
                                     @focus="textareaInputBlocked = false"
-                                    @input="e => { translationModified(e, arrkey, 'val') }">{{ val['val'] }}</textarea>
+                                    @input="e => { translationModified(e, arrkey, 'val') }" :data-arrkey="arrkey" data-type="val">{{ val['val'] }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -241,6 +241,12 @@ export default {
                     this[property][this.langCode] = JSON.parse(propertyStr);
                 }
             }
+            this.syncTextareaValues();
+        },
+        syncTextareaValues: function () {
+            document.querySelectorAll('.key-val-textarea').forEach(function(textarea) {
+                textarea.value = this.transFilesContents[this.langCode][textarea.dataset.arrkey][textarea.dataset.type];
+            }, this);
         },
         storeHistory: function () {
             if (this.historyStorageBlock) {

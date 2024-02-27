@@ -21555,6 +21555,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
           this[property][this.langCode] = JSON.parse(propertyStr);
         }
       }
+      this.syncTextareaValues();
+    },
+    syncTextareaValues: function syncTextareaValues() {
+      document.querySelectorAll('.key-val-textarea').forEach(function (textarea) {
+        textarea.value = this.transFilesContents[this.langCode][textarea.dataset.arrkey][textarea.dataset.type];
+      }, this);
     },
     storeHistory: function storeHistory() {
       if (this.historyStorageBlock) {
@@ -22129,11 +22135,11 @@ var _hoisted_56 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "app-tooltip"
 }, "Reset", -1 /* HOISTED */);
 var _hoisted_57 = [_hoisted_55, _hoisted_56];
-var _hoisted_58 = ["onInput"];
+var _hoisted_58 = ["onInput", "data-arrkey"];
 var _hoisted_59 = {
   "class": "trans"
 };
-var _hoisted_60 = ["onInput"];
+var _hoisted_60 = ["onInput", "data-arrkey"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
@@ -22281,27 +22287,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }, [].concat(_hoisted_57), 8 /* PROPS */, _hoisted_54)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)([{
           'text-danger': '' !== val.meta.error
-        }, "form-control key-textarea p-3"]),
+        }, "form-control key-textarea key-val-textarea p-3"]),
         rows: "3",
         onFocus: _cache[11] || (_cache[11] = function ($event) {
           return $data.textareaInputBlocked = false;
         }),
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'key');
-        }
+        },
+        "data-arrkey": arrkey,
+        "data-type": "key"
       }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['key']), 43 /* TEXT, CLASS, PROPS, NEED_HYDRATION */, _hoisted_58)])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["col p-2", {
           'bg-warning': val.meta.modified.val
         }])
       }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_59, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
-        "class": "form-control val-textarea p-3",
+        "class": "form-control val-textarea key-val-textarea p-3",
         rows: "3",
         onFocus: _cache[12] || (_cache[12] = function ($event) {
           return $data.textareaInputBlocked = false;
         }),
         onInput: function onInput(e) {
           $options.translationModified(e, arrkey, 'val');
-        }
+        },
+        "data-arrkey": arrkey,
+        "data-type": "val"
       }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_60)])], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])], 10 /* CLASS, PROPS */, _hoisted_3);
   }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
