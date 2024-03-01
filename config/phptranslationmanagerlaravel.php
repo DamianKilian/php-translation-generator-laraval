@@ -5,16 +5,16 @@ $regex = <<<'END'
 END;
 
 return [
-    'lang_path' => resource_path() . '/lang',
+    'lang_path' => 'resources/lang',
     'search_locations' => [
         '/resources/views' => [
             'regex' => $regex,
-            'path' => resource_path() . '/views',
+            'path' => 'resources/views',
             'file_extensions' => ['blade.php'],
         ],
         '/resources/js' => [
             'regex' => $regex,
-            'path' => resource_path() . '/js',
+            'path' => 'resources/js',
             'file_extensions' => ['vue'],
         ],
     ]

@@ -8,6 +8,62 @@ use org\bovigo\vfs\vfsStream;
 
 class TransTest extends TestCase
 {
+    public function test_search()
+    {
+        $enJson = [
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ];
+        $fileContent1 = <<<'EOD'
+        foo bar __('toFind1') foo bar
+        foo bar
+        __(  '  to\'\'Find2  '  ) foo bar
+        foo bar
+        __('k1') foo bar
+        foo bar
+        __('k3') foo bar
+        foo bar
+        EOD;
+        $fileContent2 = <<<'EOD'
+        foo bar __('toFind3') foo bar
+        foo bar
+        __(  '  to\'\'Find4  '  ) foo bar
+        foo bar
+        __('k1') foo bar
+        foo bar
+        __('k3') foo bar
+        foo bar
+        EOD;
+        $structure = [
+            'en.json' => json_encode($enJson),
+            'resources' => [
+                'views' => [
+                    'file1.blade.php' => $fileContent1,
+                    'dir1' => [
+                        'file2.blade.php' => $fileContent2,
+                    ],
+                ],
+            ],
+        ];
+        vfsStream::setup('exampleDir', null, $structure);
+        $config = (require(__DIR__ . '/../../config/phptranslationmanagerlaravel.php'))['search_locations'];
+        unset($config['/resources/js']);
+        $config['/resources/views']['path'] = vfsStream::url('exampleDir') . '/resources/views';
+        $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'), $config);
+        $resultsService = $phpTranslationManagerService->search('en.json');
+        $results = [
+            'en.json' => [
+                '/resources/views' => [
+                    'toFind1',
+                    "to\'\'Find2",
+                    'toFind3',
+                    "to\'\'Find4",
+                ]
+            ]
+        ];
+        $this->assertTrue([] === array_diff($resultsService['en.json']['/resources/views'], $results['en.json']['/resources/views']));
+    }
 
     public function test_saveTransFiles()
     {
