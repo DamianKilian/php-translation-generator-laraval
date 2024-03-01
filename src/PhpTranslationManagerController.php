@@ -35,4 +35,11 @@ class PhpTranslationManagerController extends Controller
             'transFilesContents' => $newTransFilesContents,
         ]);
     }
+
+    public function search(Request $request, PhpTranslationManagerService $phpTranslationManagerService)
+    {
+        return response()->json([
+            'searchResults' => $phpTranslationManagerService->search($request->langCode),
+        ]);
+    }
 }

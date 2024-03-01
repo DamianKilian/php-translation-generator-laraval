@@ -27,7 +27,11 @@ class PhpTranslationManagerServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(PhpTranslationManagerService::class, function () {
-            return new PhpTranslationManagerService(config('phptranslationmanagerlaravel.lang_path'));
+            $config = config('phptranslationmanagerlaravel');
+            return new PhpTranslationManagerService(
+                $config['lang_path'],
+                $config['search_locations']
+            );
         });
     }
 }

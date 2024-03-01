@@ -6,10 +6,43 @@ class PhpTranslationManagerService
 {
     const ERR_MSG = 'Duplicate key';
     protected $langPath;
+    protected $searchLocations;
 
-    public function __construct($langPath)
+    public function __construct($langPath = [], $searchLocations = [])
     {
         $this->langPath = $langPath;
+        $this->searchLocations = $searchLocations;
+    }
+
+    public function search($langCode)
+    {
+        $transFilesContents = $this->getTransFilesContents(false, $langCode)[$langCode];
+        $foundTrans = [];
+        $pattern = <<<'END'
+        /^__\(\s*'\s*|^__\(\s*"\s*|\s*'\s*\)$|\s*"\s*\)$/
+        END;
+        foreach ($this->searchLocations as $relativePath => $location) {
+            foreach ($location['file_extensions'] as $ext) {
+                $files = $this->streamSafeGlob($location['path'], '*.' . $ext, true);
+                foreach ($files as $file) {
+                    preg_match_all(
+                        $location['regex'],
+                        file_get_contents($file),
+                        $matches,
+                    );
+                    foreach ($matches[0] as $match) {
+                        $trans = preg_replace($pattern, '', $match);
+                        if (
+                            !array_key_exists($trans, $transFilesContents) &&
+                            (!array_key_exists($relativePath, $foundTrans) || false === array_search($trans, $foundTrans[$relativePath]))
+                        ) {
+                            $foundTrans[$relativePath][] = $trans;
+                        }
+                    }
+                }
+            }
+        }
+        return [$langCode => $foundTrans];
     }
 
     /**
@@ -19,28 +52,32 @@ class PhpTranslationManagerService
      * @param string $filePattern
      * @return array
      */
-    private function streamSafeGlob($directory, $filePattern)
+    private function streamSafeGlob($directory, $filePattern, $recursive = false)
     {
         $files = scandir($directory);
         $found = array();
-
         foreach ($files as $filename) {
+            if ($recursive && $filename !== '.' && $filename !== '..' && is_dir($directory . '/' . $filename)) {
+                $found = array_merge($found, $this->streamSafeGlob($directory . '/' . $filename, $filePattern, true));
+            }
             if (fnmatch($filePattern, $filename)) {
                 $found[] = $directory . '/' . $filename;
             }
         }
-
         return $found;
     }
 
-    public function getTransFilesContents()
+    public function getTransFilesContents($wrapped = true, $langCodeFilter = '')
     {
         $transFiles = $this->streamSafeGlob($this->langPath, '*.json');
         $transFilesContents = [];
         foreach ($transFiles as $transFile) {
             $langCode = str_replace($this->langPath . '/', '', $transFile);
+            if ($langCodeFilter &&  $langCodeFilter !==  $langCode) {
+                continue;
+            }
             $json = file_get_contents($transFile);
-            $transFilesContents[$langCode] = $this->wrapElementsInArray(json_decode($json, true));
+            $transFilesContents[$langCode] = $wrapped ? $this->wrapElementsInArray(json_decode($json, true)) : json_decode($json, true);
         }
         return $transFilesContents;
     }
@@ -71,7 +108,7 @@ class PhpTranslationManagerService
     {
         $newTransFilesContent = [];
         foreach ($trans as $value) {
-            if($value['meta']['deleted']){
+            if ($value['meta']['deleted']) {
                 continue;
             }
             if (isset($newTransFilesContent[$value['key']])) {
