@@ -18,9 +18,6 @@ class PhpTranslationManagerService
     {
         $transFilesContents = $this->getTransFilesContents(false, $langCode)[$langCode];
         $foundTrans = [];
-        $pattern = <<<'END'
-        /^__\(\s*'\s*|^__\(\s*"\s*|\s*'\s*\)$|\s*"\s*\)$/
-        END;
         foreach ($this->searchLocations as $relativePath => $location) {
             foreach ($location['file_extensions'] as $ext) {
                 $files = $this->streamSafeGlob($location['path'], '*.' . $ext, true);
@@ -31,7 +28,7 @@ class PhpTranslationManagerService
                         $matches,
                     );
                     foreach ($matches[0] as $match) {
-                        $trans = preg_replace($pattern, '', $match);
+                        $trans = preg_replace($location['trimRegex'], '', $match);
                         if (
                             !array_key_exists($trans, $transFilesContents) &&
                             (!array_key_exists($relativePath, $foundTrans) || false === array_search($trans, $foundTrans[$relativePath]))
