@@ -172,7 +172,8 @@
                 </div>
             </div>
         </div>
-        <Modal v-if="modalMsg.msg || modalSearchOpen" :closeModal="closeModal" :modalMsg="modalMsg" />
+        <Modal v-if="modalMsg.msg || modalSearchOpen" :searchResults="searchResults" :modalSearchOpen="modalSearchOpen"
+            :closeModal="closeModal" :modalMsg="modalMsg" :langCode="langCode" />
     </div>
 </template>
 
