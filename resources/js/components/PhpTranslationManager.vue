@@ -96,21 +96,25 @@
                                 </div>
                                 <div class="app-tooltip">Delete</div>
                             </div>
-                            <div class="app-btn">
+                            <div class="app-btn" v-if="Object.keys(historyKeysGlobal).length && this.langCode">
                                 <div @click="backForthHistory(true)" class="btn-icon">
-                                    <span :class="{ 'text-secondary': historyCurrKeyGlobal < 1 }">
+                                    <span
+                                        :class="{ 'text-secondary': historyKeysGlobal[this.langCode].historyCurrKeyGlobal < 1 }">
                                         &#8634;
                                     </span>
-                                    <div class="numOnBtn">({{ historyCurrKeyGlobal }})</div>
+                                    <div class="numOnBtn">({{ historyKeysGlobal[this.langCode].historyCurrKeyGlobal }})
+                                    </div>
                                 </div>
                                 <div class="app-tooltip">Back</div>
                             </div>
-                            <div class="app-btn">
+                            <div class="app-btn" v-if="Object.keys(historyKeysGlobal).length && this.langCode">
                                 <div @click="backForthHistory(false)" class="btn-icon">
-                                    <span :class="{ 'text-secondary': historyCurrKeyGlobal === historyLastKeyGlobal }">
+                                    <span
+                                        :class="{ 'text-secondary': historyKeysGlobal[this.langCode].historyCurrKeyGlobal === historyKeysGlobal[this.langCode].historyLastKeyGlobal }">
                                         &#8635;
                                     </span>
-                                    <div class="numOnBtn">({{ historyLastKeyGlobal - historyCurrKeyGlobal }})</div>
+                                    <div class="numOnBtn">({{ historyKeysGlobal[this.langCode].historyLastKeyGlobal -
+                historyKeysGlobal[this.langCode].historyCurrKeyGlobal }})</div>
                                 </div>
                                 <div class="app-tooltip">Forth</div>
                             </div>
@@ -193,8 +197,7 @@ export default {
                 transFilesContents: {},
             },
             historyStorageBlock: false,
-            historyLastKeyGlobal: -1,
-            historyCurrKeyGlobal: -1,
+            historyKeysGlobal: {},
             lastTransSelectedOrginalKey: '',
             textareaInputBlocked: true,
             modalMsg: {
@@ -241,13 +244,14 @@ export default {
             }
         },
         backForthHistory: function (back) {
-            if ((back ? this.historyCurrKeyGlobal < 1 : this.historyCurrKeyGlobal === this.historyLastKeyGlobal)) {
+            var hkg = this.historyKeysGlobal[this.langCode];
+            if ((back ? hkg.historyCurrKeyGlobal < 1 : hkg.historyCurrKeyGlobal === this.historyKeysGlobal[this.langCode].historyLastKeyGlobal)) {
                 return;
             }
             this.historyStorageBlock = true;
-            this.historyCurrKeyGlobal = this.historyCurrKeyGlobal + (back ? -1 : 1);
+            hkg.historyCurrKeyGlobal = hkg.historyCurrKeyGlobal + (back ? -1 : 1);
             for (const property in this.history) {
-                var propertyStr = this.history[property][this.langCode][this.historyCurrKeyGlobal];
+                var propertyStr = this.history[property][this.langCode][hkg.historyCurrKeyGlobal];
                 if (propertyStr) {
                     this[property][this.langCode] = JSON.parse(propertyStr);
                 }
@@ -260,6 +264,7 @@ export default {
             }, this);
         },
         storeHistory: function () {
+            var hkg = this.historyKeysGlobal[this.langCode];
             if (this.historyStorageBlock) {
                 this.historyStorageBlock = false;
                 return;
@@ -271,10 +276,10 @@ export default {
                     history[property][this.langCode] = [];
                 }
                 var propertyStr = JSON.stringify(this[property][this.langCode]);
-                if (this.historyCurrKeyGlobal < 0 || history[property][this.langCode][this.historyCurrKeyGlobal] !== propertyStr) {
-                    if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
+                if (hkg.historyCurrKeyGlobal < 0 || history[property][this.langCode][hkg.historyCurrKeyGlobal] !== propertyStr) {
+                    if (this.historyKeysGlobal[this.langCode].historyLastKeyGlobal !== hkg.historyCurrKeyGlobal) {
                         for (const property in history) {
-                            history[property][this.langCode] = history[property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
+                            history[property][this.langCode] = history[property][this.langCode].slice(0, hkg.historyCurrKeyGlobal + 1);
                         }
                     }
                     history[property][this.langCode].push(propertyStr);
@@ -284,11 +289,19 @@ export default {
                 }
             }
             if (historyKeyGlobalInc) {
-                this.historyLastKeyGlobal = ++this.historyCurrKeyGlobal;
+                this.historyKeysGlobal[this.langCode].historyLastKeyGlobal = ++hkg.historyCurrKeyGlobal;
             } else {
                 for (const property in history) {
                     history[property][this.langCode].pop();
                 }
+            }
+        },
+        setHistoryKeysGlobal: function (langCodes) {
+            for (const key in langCodes) {
+                this.historyKeysGlobal[langCodes[key]] = {
+                    historyLastKeyGlobal: -1,
+                    historyCurrKeyGlobal: -1
+                };
             }
         },
         deleteTrans: function (e, undelete = false, selectedTransProp = {}) {
@@ -442,6 +455,7 @@ export default {
             axios
                 .post(this.getTransFilesContentsDataUrl)
                 .then((response) => {
+                    this.setHistoryKeysGlobal(Object.keys(response.data.transFilesContents));
                     this.getTransFilesContents(response.data.transFilesContents);
                 }).catch((error) => {
                     console.log(error);

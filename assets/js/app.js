@@ -21503,8 +21503,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         transFilesContents: {}
       },
       historyStorageBlock: false,
-      historyLastKeyGlobal: -1,
-      historyCurrKeyGlobal: -1,
+      historyKeysGlobal: {},
       lastTransSelectedOrginalKey: '',
       textareaInputBlocked: true,
       modalMsg: {
@@ -21551,13 +21550,14 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }
     },
     backForthHistory: function backForthHistory(back) {
-      if (back ? this.historyCurrKeyGlobal < 1 : this.historyCurrKeyGlobal === this.historyLastKeyGlobal) {
+      var hkg = this.historyKeysGlobal[this.langCode];
+      if (back ? hkg.historyCurrKeyGlobal < 1 : hkg.historyCurrKeyGlobal === this.historyKeysGlobal[this.langCode].historyLastKeyGlobal) {
         return;
       }
       this.historyStorageBlock = true;
-      this.historyCurrKeyGlobal = this.historyCurrKeyGlobal + (back ? -1 : 1);
+      hkg.historyCurrKeyGlobal = hkg.historyCurrKeyGlobal + (back ? -1 : 1);
       for (var property in this.history) {
-        var propertyStr = this.history[property][this.langCode][this.historyCurrKeyGlobal];
+        var propertyStr = this.history[property][this.langCode][hkg.historyCurrKeyGlobal];
         if (propertyStr) {
           this[property][this.langCode] = JSON.parse(propertyStr);
         }
@@ -21570,6 +21570,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }, this);
     },
     storeHistory: function storeHistory() {
+      var hkg = this.historyKeysGlobal[this.langCode];
       if (this.historyStorageBlock) {
         this.historyStorageBlock = false;
         return;
@@ -21581,10 +21582,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
           history[property][this.langCode] = [];
         }
         var propertyStr = JSON.stringify(this[property][this.langCode]);
-        if (this.historyCurrKeyGlobal < 0 || history[property][this.langCode][this.historyCurrKeyGlobal] !== propertyStr) {
-          if (this.historyLastKeyGlobal !== this.historyCurrKeyGlobal) {
+        if (hkg.historyCurrKeyGlobal < 0 || history[property][this.langCode][hkg.historyCurrKeyGlobal] !== propertyStr) {
+          if (this.historyKeysGlobal[this.langCode].historyLastKeyGlobal !== hkg.historyCurrKeyGlobal) {
             for (var _property in history) {
-              history[_property][this.langCode] = history[_property][this.langCode].slice(0, this.historyCurrKeyGlobal + 1);
+              history[_property][this.langCode] = history[_property][this.langCode].slice(0, hkg.historyCurrKeyGlobal + 1);
             }
           }
           history[property][this.langCode].push(propertyStr);
@@ -21594,11 +21595,19 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         }
       }
       if (historyKeyGlobalInc) {
-        this.historyLastKeyGlobal = ++this.historyCurrKeyGlobal;
+        this.historyKeysGlobal[this.langCode].historyLastKeyGlobal = ++hkg.historyCurrKeyGlobal;
       } else {
         for (var _property2 in history) {
           history[_property2][this.langCode].pop();
         }
+      }
+    },
+    setHistoryKeysGlobal: function setHistoryKeysGlobal(langCodes) {
+      for (var key in langCodes) {
+        this.historyKeysGlobal[langCodes[key]] = {
+          historyLastKeyGlobal: -1,
+          historyCurrKeyGlobal: -1
+        };
       }
     },
     deleteTrans: function deleteTrans(e) {
@@ -21757,6 +21766,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     getTransFilesContentsData: function getTransFilesContentsData() {
       var _this3 = this;
       axios.post(this.getTransFilesContentsDataUrl).then(function (response) {
+        _this3.setHistoryKeysGlobal(Object.keys(response.data.transFilesContents));
         _this3.getTransFilesContents(response.data.transFilesContents);
       })["catch"](function (error) {
         console.log(error);
@@ -22115,6 +22125,7 @@ var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "app-tooltip"
 }, "Delete", -1 /* HOISTED */);
 var _hoisted_36 = {
+  key: 0,
   "class": "app-btn"
 };
 var _hoisted_37 = {
@@ -22124,6 +22135,7 @@ var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "app-tooltip"
 }, "Back", -1 /* HOISTED */);
 var _hoisted_39 = {
+  key: 1,
   "class": "app-btn"
 };
 var _hoisted_40 = {
@@ -22177,6 +22189,7 @@ var _hoisted_59 = {
 };
 var _hoisted_60 = ["onInput", "data-arrkey"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
+  var _this = this;
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("nav", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(Object.keys($data.transFilesContents), function (langCode, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
@@ -22257,25 +22270,25 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         return $options.deleteTrans();
       }),
       "class": "btn-icon"
-    }, [].concat(_hoisted_34)), _hoisted_35]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_36, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [].concat(_hoisted_34)), _hoisted_35]), Object.keys($data.historyKeysGlobal).length && _this.langCode ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_36, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[8] || (_cache[8] = function ($event) {
         return $options.backForthHistory(true);
       }),
       "class": "btn-icon"
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
-        'text-secondary': $data.historyCurrKeyGlobal < 1
+        'text-secondary': $data.historyKeysGlobal[_this.langCode].historyCurrKeyGlobal < 1
       })
-    }, " ↺ ", 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_37, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.historyCurrKeyGlobal) + ")", 1 /* TEXT */)]), _hoisted_38]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, " ↺ ", 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_37, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.historyKeysGlobal[_this.langCode].historyCurrKeyGlobal) + ") ", 1 /* TEXT */)]), _hoisted_38])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), Object.keys($data.historyKeysGlobal).length && _this.langCode ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[9] || (_cache[9] = function ($event) {
         return $options.backForthHistory(false);
       }),
       "class": "btn-icon"
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
-        'text-secondary': $data.historyCurrKeyGlobal === $data.historyLastKeyGlobal
+        'text-secondary': $data.historyKeysGlobal[_this.langCode].historyCurrKeyGlobal === $data.historyKeysGlobal[_this.langCode].historyLastKeyGlobal
       })
-    }, " ↻ ", 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.historyLastKeyGlobal - $data.historyCurrKeyGlobal) + ")", 1 /* TEXT */)]), _hoisted_41]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [$options.duplicateKeyRecords.length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    }, " ↻ ", 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.historyKeysGlobal[_this.langCode].historyLastKeyGlobal - $data.historyKeysGlobal[_this.langCode].historyCurrKeyGlobal) + ")", 1 /* TEXT */)]), _hoisted_41])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [$options.duplicateKeyRecords.length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: 0,
       onClick: _cache[10] || (_cache[10] = function () {
         return $options.filterErrors && $options.filterErrors.apply($options, arguments);
