@@ -21492,10 +21492,13 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   },
   props: {
     getTransFilesContentsDataUrl: String,
-    saveTransFilesUrl: String
+    saveTransFilesUrl: String,
+    searchUrl: String
   },
   data: function data() {
     return {
+      searchResults: {},
+      modalSearchOpen: false,
       history: {
         transFilesContents: {}
       },
@@ -21509,7 +21512,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         type: ''
       },
       filterErrorsOn: false,
-      duplicateKeyRecords: [],
       langCode: null,
       sidePanelOpen: false,
       confirmSaveOpen: false,
@@ -21520,6 +21522,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   computed: {
     countSelectedTransNum: function countSelectedTransNum() {
       return this.getSelectedTrans().length;
+    },
+    duplicateKeyRecords: function duplicateKeyRecords() {
+      return this.getDuplicateKeyRecords();
     }
   },
   methods: {
@@ -21534,10 +21539,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       if (valTextarea.value !== orginalVal || keyTextarea.value !== orginalKey) {
         keyRecord.meta = this.getMeta(orginalVal, orginalKey);
         if (valTextarea.value !== orginalVal) {
+          this.historyStorageBlock = true;
           valTextarea.value = orginalVal;
           valTextarea.dispatchEvent(new Event('input'));
         }
         if (keyTextarea.value !== orginalKey) {
+          this.historyStorageBlock = true;
           keyTextarea.value = orginalKey;
           keyTextarea.dispatchEvent(new Event('input'));
         }
@@ -21644,6 +21651,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         msg: '',
         type: ''
       };
+      this.modalSearchOpen = false;
     },
     selectAction: function selectAction(e, arrkey) {
       var keyRecord = this.transFilesContents[this.langCode][arrkey];
@@ -21694,20 +21702,35 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }]);
       this.getTransFilesContents(data, true);
     },
-    searchTrans: function searchTrans() {},
-    saveTransFiles: function saveTransFiles() {
+    openSearchModal: function openSearchModal() {
+      this.modalSearchOpen = true;
+      this.confirmSearchOpen = false;
+    },
+    searchTrans: function searchTrans() {
       var _this = this;
+      this.openSearchModal();
+      axios.post(this.searchUrl, {
+        langCode: this.langCode
+      }).then(function (response) {
+        var langCode = Object.keys(response.data.searchResults)[0];
+        _this.searchResults[langCode] = response.data.searchResults[langCode];
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    saveTransFiles: function saveTransFiles() {
+      var _this2 = this;
       var data = {};
       data[this.langCode] = this.transFilesContents[this.langCode];
       axios.post(this.saveTransFilesUrl, {
         trans: data
       }).then(function (response) {
         if (response.data.success) {
-          _this.getTransFilesContents(response.data.transFilesContents);
-          _this.filterErrorsOn = false;
-          _this.confirmSaveOpen = false;
+          _this2.getTransFilesContents(response.data.transFilesContents);
+          _this2.filterErrorsOn = false;
+          _this2.confirmSaveOpen = false;
         } else {
-          _this.modalMsg = {
+          _this2.modalMsg = {
             msg: response.data.error,
             type: 'error'
           };
@@ -21732,9 +21755,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       };
     },
     getTransFilesContentsData: function getTransFilesContentsData() {
-      var _this2 = this;
+      var _this3 = this;
       axios.post(this.getTransFilesContentsDataUrl).then(function (response) {
-        _this2.getTransFilesContents(response.data.transFilesContents);
+        _this3.getTransFilesContents(response.data.transFilesContents);
       })["catch"](function (error) {
         console.log(error);
       });
@@ -21800,12 +21823,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       this.reCheckDuplicateKeys();
     }, 500),
     reCheckDuplicateKeys: function reCheckDuplicateKeys() {
-      if (Object.keys(this.duplicateKeyRecords).length === 0) {
+      var duplicateKeyRecords = this.duplicateKeyRecords;
+      if (duplicateKeyRecords.length === 0) {
         return;
       }
-      for (var key in this.duplicateKeyRecords) {
-        var keyRecord = this.duplicateKeyRecords[key];
-        this.duplicateKeyRecords.splice(key, 1);
+      for (var key in duplicateKeyRecords) {
+        var keyRecord = duplicateKeyRecords[key];
         this.checkDuplicateKey(keyRecord, keyRecord.key);
       }
     },
@@ -21821,6 +21844,16 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         keyRecord.meta.modified.key = newKey !== keyRecord.meta.orginalKey;
       }
     },
+    getDuplicateKeyRecords: function getDuplicateKeyRecords() {
+      var duplicateKeyRecords = [];
+      for (var key in this.transFilesContents[this.langCode]) {
+        var trans = this.transFilesContents[this.langCode][key];
+        if (trans.meta.error) {
+          duplicateKeyRecords.push(trans);
+        }
+      }
+      return duplicateKeyRecords;
+    },
     checkDuplicateKey: function checkDuplicateKey(keyRecord, newKey) {
       var matches = 0;
       for (var key in this.transFilesContents[this.langCode]) {
@@ -21828,7 +21861,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         if (newKey === keyTextarea.key) {
           if (1 < ++matches) {
             keyRecord.meta.error = 'duplicate key';
-            this.duplicateKeyRecords.push(keyRecord);
             return;
           }
         }
@@ -21836,12 +21868,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       keyRecord.meta.error = '';
     },
     gettingLangCodeFromTabs: function gettingLangCodeFromTabs() {
-      var _this3 = this;
+      var _this4 = this;
       this.langCode = document.querySelector('.nav-tabs .active').dataset.langCode;
       var tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
       tabEls.forEach(function (tabEl) {
         tabEl.addEventListener('shown.bs.tab', function (e) {
-          _this3.langCode = e.target.dataset.langCode;
+          _this4.langCode = e.target.dataset.langCode;
         });
       });
     }
@@ -21900,14 +21932,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
+  key: 0,
   "class": "app-modal"
 };
 var _hoisted_2 = {
   key: 0,
   "class": "text-danger fs-3"
 };
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "app-modal search-results"
+}, null, -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, ['error' === this.modalMsg.type ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_2, " ⚠ ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [$props.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, ['error' === this.modalMsg.type ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_2, " ⚠ ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
       'text-danger': 'error' === this.modalMsg.type
     })
@@ -21916,7 +21952,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function () {
       return $props.closeModal && $props.closeModal.apply($props, arguments);
     })
-  }, " Close ")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, " Close ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     className: "app-modal-backdrop",
     onClick: _cache[1] || (_cache[1] = function () {
       return $props.closeModal && $props.closeModal.apply($props, arguments);
@@ -22190,7 +22226,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }),
       type: "button",
       "class": "btn btn-primary float-end"
-    }, "Search")], 2 /* CLASS */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, "Search for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\"", 1 /* TEXT */)], 2 /* CLASS */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[3] || (_cache[3] = function ($event) {
         $options.confirmClose($event, true);
         $data.confirmSaveOpen = !$data.confirmSaveOpen;
@@ -22239,7 +22275,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
         'text-secondary': $data.historyCurrKeyGlobal === $data.historyLastKeyGlobal
       })
-    }, " ↻ ", 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.historyLastKeyGlobal - $data.historyCurrKeyGlobal) + ")", 1 /* TEXT */)]), _hoisted_41]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [Object.keys($data.duplicateKeyRecords).length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    }, " ↻ ", 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_40, "(" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.historyLastKeyGlobal - $data.historyCurrKeyGlobal) + ")", 1 /* TEXT */)]), _hoisted_41]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [$options.duplicateKeyRecords.length !== 0 || $data.filterErrorsOn ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: 0,
       onClick: _cache[10] || (_cache[10] = function () {
         return $options.filterErrors && $options.filterErrors.apply($options, arguments);
@@ -22247,7 +22283,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "error btn-icon red"
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
-        'text-success': Object.keys($data.duplicateKeyRecords).length === 0
+        'text-success': $options.duplicateKeyRecords.length === 0
       })
     }, " ⚠ ", 2 /* CLASS */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_43])])])], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_44, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(transFileContent, function (val, arrkey) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
@@ -22314,7 +22350,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "data-type": "val"
       }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_60)])], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])], 10 /* CLASS, PROPS */, _hoisted_3);
-  }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
+  }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg || $data.modalSearchOpen ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
     key: 0,
     closeModal: $options.closeModal,
     modalMsg: $data.modalMsg

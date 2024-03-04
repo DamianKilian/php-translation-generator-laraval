@@ -2,8 +2,9 @@
     <nav>
         <div class="nav nav-tabs" id="nav-tab">
             <button v-for="(langCode, index) in Object.keys(transFilesContents)" class="nav-link"
-                :class="{ 'active': index === 0 }" :set="code = langCode.replace('.json', '')" :id="'nav-' + code + '-tab'"
-                data-bs-toggle="tab" :data-bs-target="'#nav-' + code" :data-lang-code="langCode">{{ langCode }}
+                :class="{ 'active': index === 0 }" :set="code = langCode.replace('.json', '')"
+                :id="'nav-' + code + '-tab'" data-bs-toggle="tab" :data-bs-target="'#nav-' + code"
+                :data-lang-code="langCode">{{ langCode }}
                 ({{ transFilesContents[langCode].length }})</button>
         </div>
     </nav>
@@ -38,16 +39,16 @@
                                 <div class="btn-confirm-wrapper">
                                     <div @click="confirmClose($event, true); confirmSearchOpen = !confirmSearchOpen"
                                         class="search btn-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
-                                            fill="none" stroke="#417505" stroke-width="2.5" stroke-linecap="round"
-                                            stroke-linejoin="round">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"
+                                            viewBox="0 0 24 24" fill="none" stroke="#417505" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
                                             <circle cx="11" cy="11" r="8"></circle>
                                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                         </svg>
                                     </div>
                                     <div :class="{ open: confirmSearchOpen }" class="confirm text-bg-dark p-2">
                                         <button @click="searchTrans" type="button"
-                                            class="btn btn-primary float-end">Search</button>
+                                            class="btn btn-primary float-end">Search for "{{ langCode }}"</button>
                                     </div>
                                 </div>
                             </div>
@@ -56,9 +57,9 @@
                                 <div class="btn-confirm-wrapper">
                                     <div @click="confirmClose($event, true); confirmSaveOpen = !confirmSaveOpen"
                                         class="save btn-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
-                                            fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"
+                                            viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z">
                                             </path>
                                             <polyline points="17 21 17 13 7 13 7 21"></polyline>
@@ -115,8 +116,8 @@
                             </div>
                             <div class="app-btn">
                                 <div @click="filterErrors" class="error btn-icon red"
-                                    v-if="Object.keys(duplicateKeyRecords).length !== 0 || filterErrorsOn">
-                                    <span :class="{ 'text-success': Object.keys(duplicateKeyRecords).length === 0 }">
+                                    v-if="duplicateKeyRecords.length !== 0 || filterErrorsOn">
+                                    <span :class="{ 'text-success': duplicateKeyRecords.length === 0 }">
                                         &#9888;
                                     </span>
                                 </div>
@@ -149,22 +150,25 @@
                                     </div>
                                 </div>
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
-                                    class="form-control key-textarea key-val-textarea p-3" rows="3" @focus="textareaInputBlocked = false"
-                                    @input="e => { translationModified(e, arrkey, 'key') }" :data-arrkey="arrkey" data-type="key">{{ val['key'] }}</textarea>
+                                    class="form-control key-textarea key-val-textarea p-3" rows="3"
+                                    @focus="textareaInputBlocked = false"
+                                    @input="e => { translationModified(e, arrkey, 'key') }" :data-arrkey="arrkey"
+                                    data-type="key">{{ val['key'] }}</textarea>
                             </div>
                         </div>
                         <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
                             <div class="trans">
                                 <textarea class="form-control val-textarea key-val-textarea p-3" rows="3"
                                     @focus="textareaInputBlocked = false"
-                                    @input="e => { translationModified(e, arrkey, 'val') }" :data-arrkey="arrkey" data-type="val">{{ val['val'] }}</textarea>
+                                    @input="e => { translationModified(e, arrkey, 'val') }" :data-arrkey="arrkey"
+                                    data-type="val">{{ val['val'] }}</textarea>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <Modal v-if="modalMsg.msg" :closeModal="closeModal" :modalMsg="modalMsg" />
+        <Modal v-if="modalMsg.msg || modalSearchOpen" :closeModal="closeModal" :modalMsg="modalMsg" />
     </div>
 </template>
 
@@ -179,9 +183,12 @@ export default {
     props: {
         getTransFilesContentsDataUrl: String,
         saveTransFilesUrl: String,
+        searchUrl: String,
     },
     data() {
         return {
+            searchResults: {},
+            modalSearchOpen: false,
             history: {
                 transFilesContents: {},
             },
@@ -195,7 +202,6 @@ export default {
                 type: '',
             },
             filterErrorsOn: false,
-            duplicateKeyRecords: [],
             langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
@@ -206,6 +212,9 @@ export default {
     computed: {
         countSelectedTransNum() {
             return this.getSelectedTrans().length;
+        },
+        duplicateKeyRecords() {
+            return this.getDuplicateKeyRecords();
         }
     },
     methods: {
@@ -220,10 +229,12 @@ export default {
             if (valTextarea.value !== orginalVal || keyTextarea.value !== orginalKey) {
                 keyRecord.meta = this.getMeta(orginalVal, orginalKey);
                 if (valTextarea.value !== orginalVal) {
+                    this.historyStorageBlock = true;
                     valTextarea.value = orginalVal;
                     valTextarea.dispatchEvent(new Event('input'));
                 }
                 if (keyTextarea.value !== orginalKey) {
+                    this.historyStorageBlock = true;
                     keyTextarea.value = orginalKey;
                     keyTextarea.dispatchEvent(new Event('input'));
                 }
@@ -244,7 +255,7 @@ export default {
             this.syncTextareaValues();
         },
         syncTextareaValues: function () {
-            document.querySelectorAll('.key-val-textarea').forEach(function(textarea) {
+            document.querySelectorAll('.key-val-textarea').forEach(function (textarea) {
                 textarea.value = this.transFilesContents[this.langCode][textarea.dataset.arrkey][textarea.dataset.type];
             }, this);
         },
@@ -328,6 +339,7 @@ export default {
                 msg: '',
                 type: '',
             };
+            this.modalSearchOpen = false;
         },
         selectAction: function (e, arrkey) {
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
@@ -379,7 +391,20 @@ export default {
             };
             this.getTransFilesContents(data, true);
         },
+        openSearchModal: function () {
+            this.modalSearchOpen = true;
+            this.confirmSearchOpen = false;
+        },
         searchTrans: function () {
+            this.openSearchModal();
+            axios
+                .post(this.searchUrl, { langCode: this.langCode })
+                .then((response) => {
+                    var langCode = Object.keys(response.data.searchResults)[0];
+                    this.searchResults[langCode] = response.data.searchResults[langCode];
+                }).catch((error) => {
+                    console.log(error);
+                });
         },
         saveTransFiles: function () {
             var data = {};
@@ -473,12 +498,12 @@ export default {
             this.reCheckDuplicateKeys();
         }, 500),
         reCheckDuplicateKeys: function () {
-            if (Object.keys(this.duplicateKeyRecords).length === 0) {
+            var duplicateKeyRecords = this.duplicateKeyRecords;
+            if (duplicateKeyRecords.length === 0) {
                 return;
             }
-            for (const key in this.duplicateKeyRecords) {
-                var keyRecord = this.duplicateKeyRecords[key];
-                this.duplicateKeyRecords.splice(key, 1);
+            for (const key in duplicateKeyRecords) {
+                var keyRecord = duplicateKeyRecords[key];
                 this.checkDuplicateKey(keyRecord, keyRecord.key);
             }
         },
@@ -494,6 +519,16 @@ export default {
                 keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
             }
         },
+        getDuplicateKeyRecords: function () {
+            var duplicateKeyRecords = [];
+            for (const key in this.transFilesContents[this.langCode]) {
+                var trans = this.transFilesContents[this.langCode][key];
+                if (trans.meta.error) {
+                    duplicateKeyRecords.push(trans);
+                }
+            }
+            return duplicateKeyRecords;
+        },
         checkDuplicateKey: function (keyRecord, newKey) {
             var matches = 0;
             for (const key in this.transFilesContents[this.langCode]) {
@@ -501,7 +536,6 @@ export default {
                 if (newKey === keyTextarea.key) {
                     if (1 < ++matches) {
                         keyRecord.meta.error = 'duplicate key';
-                        this.duplicateKeyRecords.push(keyRecord);
                         return;
                     }
                 }
