@@ -12116,16 +12116,26 @@ textarea.form-control-lg {
 
 .search-results-btns .search-results-btn {
   margin-right: 3px;
-  cursor: pointer;
   float: left;
+}
+.search-results-btns .search-results-btn .icon {
+  cursor: pointer;
   height: 55px;
   line-height: 55px;
   font-size: 55px;
   overflow: hidden;
 }
-.search-results-btns .search-results-btn.add-all-results {
+.search-results-btns .search-results-btn.add-all-results .icon {
   font-size: 61px;
   line-height: 50px;
+}
+.search-results-btns .search-results-btn .search-tooltip {
+  height: 0;
+  visibility: hidden;
+  margin-top: -4px;
+}
+.search-results-btns .search-results-btn:hover .search-tooltip {
+  visibility: visible;
 }
 
 .form-control {
@@ -12189,6 +12199,8 @@ textarea.form-control-lg {
   visibility: visible;
 }
 
+.search-results-btns .btn-icon:hover,
+.search-results-btns .icon:hover,
 .app-btn .btn-icon:hover,
 .app-btn .icon:hover,
 .btn-small .btn-icon:hover,

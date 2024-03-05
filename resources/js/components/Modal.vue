@@ -12,8 +12,14 @@
         <div v-if="undefined !== searchResults[langCode] && Object.keys(searchResults[langCode]).length">
             <div class="fixed-top">
                 <div class="search-results-btns">
-                    <div class="select-all-results search-results-btn">&#9745;</div>
-                    <div class="add-all-results search-results-btn">&plusb;</div>
+                    <div class="select-all-results search-results-btn" @click="selectAllResults">
+                        <div class="icon">&#9745;</div>
+                        <div class="search-tooltip">Select all</div>
+                    </div>
+                    <div class="add-all-results search-results-btn">
+                        <div class="icon">&plusb;</div>
+                        <div class="search-tooltip">Add all</div>
+                    </div>
                 </div>
             </div>
             <h3 class="lang-code">{{ langCode }}</h3>
@@ -42,6 +48,22 @@ export default {
         searchResults: Object,
         modalSearchOpen: Boolean,
         langCode: Boolean,
+    },
+    methods: {
+        selectAllResults: function (e, select = true) {
+            var notSelected = 0;
+            for (const location in this.searchResults[this.langCode]) {
+                for (const val of this.searchResults[this.langCode][location]) {
+                    if (!val.selected && !notSelected) {
+                        notSelected++;
+                    }
+                    val.selected = select;
+                }
+            }
+            if (!notSelected && select) {
+                this.selectAllResults(e, false);
+            }
+        }
     },
     mounted() {
     }
