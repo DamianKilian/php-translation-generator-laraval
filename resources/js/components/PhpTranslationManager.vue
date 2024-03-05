@@ -415,10 +415,24 @@ export default {
                 .post(this.searchUrl, { langCode: this.langCode })
                 .then((response) => {
                     var langCode = Object.keys(response.data.searchResults)[0];
-                    this.searchResults[langCode] = response.data.searchResults[langCode];
+                    this.searchResults[langCode] = this.searchResultsAddMeta(response.data.searchResults[langCode]);
                 }).catch((error) => {
                     console.log(error);
                 });
+        },
+        searchResultsAddMeta: function (searchResults) {
+            var searchResultsWithMeta = {};
+            console.debug(searchResults);//mmmyyy
+            for (const location in searchResults) {
+                searchResultsWithMeta[location] = [];
+                for (const trans of searchResults[location]) {
+                    searchResultsWithMeta[location].push({
+                        trans: trans,
+                        selected: false,
+                    });
+                }
+            }
+            return searchResultsWithMeta;
         },
         saveTransFiles: function () {
             var data = {};
