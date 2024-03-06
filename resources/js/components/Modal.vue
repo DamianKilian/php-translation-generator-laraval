@@ -14,11 +14,11 @@
                 <div class="search-results-btns">
                     <div class="select-all-results search-results-btn" @click="selectAllResults">
                         <div class="icon">&#9745;</div>
-                        <div class="search-tooltip">Select all</div>
+                        <div class="search-tooltip">Select&nbsp;all</div>
                     </div>
                     <div class="add-all-results search-results-btn">
                         <div class="icon">&plusb;</div>
-                        <div class="search-tooltip">Add all</div>
+                        <div class="search-tooltip">Add&nbsp;selected</div>
                     </div>
                 </div>
             </div>

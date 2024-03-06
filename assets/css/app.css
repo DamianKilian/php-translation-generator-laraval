@@ -12133,6 +12133,8 @@ textarea.form-control-lg {
   height: 0;
   visibility: hidden;
   margin-top: -4px;
+  width: 0;
+  margin-left: 5px;
 }
 .search-results-btns .search-results-btn:hover .search-tooltip {
   visibility: visible;

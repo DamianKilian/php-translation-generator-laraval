@@ -21693,6 +21693,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         type: ''
       };
       this.modalSearchOpen = false;
+      document.body.classList.remove('overflow-hidden');
     },
     selectAction: function selectAction(e, arrkey) {
       var keyRecord = this.transFilesContents[this.langCode][arrkey];
@@ -21746,6 +21747,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     openSearchModal: function openSearchModal() {
       this.modalSearchOpen = true;
       this.confirmSearchOpen = false;
+      document.body.classList.add('overflow-hidden');
     },
     searchTrans: function searchTrans() {
       var _this = this;
@@ -22022,7 +22024,7 @@ var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 }, "☑", -1 /* HOISTED */);
 var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "search-tooltip"
-}, "Select all", -1 /* HOISTED */);
+}, "Select all", -1 /* HOISTED */);
 var _hoisted_9 = [_hoisted_7, _hoisted_8];
 var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "add-all-results search-results-btn"
@@ -22030,7 +22032,7 @@ var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "icon"
 }, "⊞"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "search-tooltip"
-}, "Add all")], -1 /* HOISTED */);
+}, "Add selected")], -1 /* HOISTED */);
 var _hoisted_11 = {
   "class": "lang-code"
 };

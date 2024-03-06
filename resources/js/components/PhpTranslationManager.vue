@@ -354,6 +354,7 @@ export default {
                 type: '',
             };
             this.modalSearchOpen = false;
+            document.body.classList.remove('overflow-hidden');
         },
         selectAction: function (e, arrkey) {
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
@@ -408,6 +409,7 @@ export default {
         openSearchModal: function () {
             this.modalSearchOpen = true;
             this.confirmSearchOpen = false;
+            document.body.classList.add('overflow-hidden');
         },
         searchTrans: function () {
             this.openSearchModal();
