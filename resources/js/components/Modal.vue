@@ -20,6 +20,9 @@
                         <div class="icon">&plusb;</div>
                         <div class="search-tooltip">Add&nbsp;selected</div>
                     </div>
+                    <div class="search-results-btn" @click="closeModal">
+                        <div class="icon">&cross;</div>
+                    </div>
                 </div>
             </div>
             <h3 class="lang-code">{{ langCode }}</h3>

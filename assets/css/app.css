@@ -12139,6 +12139,9 @@ textarea.form-control-lg {
 .search-results-btns .search-results-btn:hover .search-tooltip {
   visibility: visible;
 }
+.search-results-btns .search-results-btn:last-child {
+  float: right;
+}
 
 .form-control {
   background-color: #fff;

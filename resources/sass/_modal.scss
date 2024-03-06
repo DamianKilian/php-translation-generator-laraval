@@ -90,6 +90,9 @@
                 visibility: visible;
             }
         }
+        &:last-child {
+            float: right;
+        }
     }
 }
 
