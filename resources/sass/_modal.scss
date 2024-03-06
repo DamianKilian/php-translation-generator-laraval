@@ -48,6 +48,12 @@
             top: 5vh;
             width: 60rem;
             background-color: #fff;
+            &.alert {
+                z-index: 1060;
+                width: 44rem;
+                background-color: var(--bs-alert-bg);
+                height: 53px;
+            }
         }
         .spinner-border {
             position: absolute;

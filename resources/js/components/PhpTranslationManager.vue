@@ -173,7 +173,8 @@
             </div>
         </div>
         <Modal v-if="modalMsg.msg || modalSearchOpen" :searchResults="searchResults" :modalSearchOpen="modalSearchOpen"
-            :closeModal="closeModal" :modalMsg="modalMsg" :langCode="langCode" />
+            :closeModal="closeModal" :getTransFilesContents="getTransFilesContents" :modalMsg="modalMsg"
+            :langCode="langCode" :getKeys="getKeys" :transFilesContents="transFilesContents" />
     </div>
 </template>
 
@@ -424,13 +425,13 @@ export default {
         },
         searchResultsAddMeta: function (searchResults) {
             var searchResultsWithMeta = {};
-            console.debug(searchResults);//mmmyyy
             for (const location in searchResults) {
                 searchResultsWithMeta[location] = [];
                 for (const trans of searchResults[location]) {
                     searchResultsWithMeta[location].push({
                         trans: trans,
                         selected: false,
+                        added: false,
                     });
                 }
             }

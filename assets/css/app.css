@@ -12103,6 +12103,12 @@ textarea.form-control-lg {
   width: 60rem;
   background-color: #fff;
 }
+.app-modal.search-results .fixed-top.alert {
+  z-index: 1060;
+  width: 44rem;
+  background-color: var(--bs-alert-bg);
+  height: 53px;
+}
 .app-modal.search-results .spinner-border {
   position: absolute;
   margin: auto;

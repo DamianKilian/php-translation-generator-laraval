@@ -16,7 +16,7 @@
                         <div class="icon">&#9745;</div>
                         <div class="search-tooltip">Select&nbsp;all</div>
                     </div>
-                    <div class="add-all-results search-results-btn">
+                    <div class="add-all-results search-results-btn" @click="addSelectedNewTransFromSearch">
                         <div class="icon">&plusb;</div>
                         <div class="search-tooltip">Add&nbsp;selected</div>
                     </div>
@@ -24,6 +24,9 @@
                         <div class="icon">&cross;</div>
                     </div>
                 </div>
+            </div>
+            <div class="alert alert-danger fixed-top" v-if="error" role="alert">
+                {{ error }}
             </div>
             <h3 class="lang-code">{{ langCode }}</h3>
             <div v-for="(arr, location) in searchResults[langCode]" class="row px-3 py-2">
@@ -46,11 +49,19 @@
 <script>
 export default {
     props: {
+        getTransFilesContents: Function,
         closeModal: Function,
+        getKeys: Function,
+        transFilesContents: Object,
         modalMsg: Object,
         searchResults: Object,
         modalSearchOpen: Boolean,
         langCode: Boolean,
+    },
+    data() {
+        return {
+            error: '',
+        }
     },
     methods: {
         selectAllResults: function (e, select = true) {
@@ -66,7 +77,40 @@ export default {
             if (!notSelected && select) {
                 this.selectAllResults(e, false);
             }
-        }
+        },
+        checkSelectedSearchTransAreUnique: function () {
+            var keys = this.getKeys(this.transFilesContents[this.langCode]);
+            for (const location in this.searchResults[this.langCode]) {
+                for (const val of this.searchResults[this.langCode][location]) {
+                    if (val.selected && !val.added && keys.indexOf(val.trans) > -1) {
+                        return val.trans;
+                    }
+                }
+            }
+            return '';
+        },
+        addSelectedNewTransFromSearch: function () {
+            var notUniqueTrans = this.checkSelectedSearchTransAreUnique();
+            if (notUniqueTrans) {
+                this.error = `"${notUniqueTrans}" translation is taken`;
+                return;
+            }
+            for (const location in this.searchResults[this.langCode]) {
+                for (const val of this.searchResults[this.langCode][location]) {
+                    if (!val.selected || val.added) {
+                        continue;
+                    }
+                    var data = {
+                        [this.langCode]: [{
+                            key: val.trans,
+                            val: 'new'
+                        }]
+                    };
+                    this.getTransFilesContents(data, true);
+                    val.added = true;
+                }
+            }
+        },
     },
     mounted() {
     }
