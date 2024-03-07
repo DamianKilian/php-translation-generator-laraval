@@ -21541,7 +21541,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               key: val.trans,
               val: 'new'
             }]);
-            this.getTransFilesContents(data, true);
+            this.getTransFilesContents(data, {
+              "new": true,
+              selected: true
+            });
             val.added = true;
           }
         } catch (err) {
@@ -21803,7 +21806,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         key: newKey,
         val: 'new'
       }]);
-      this.getTransFilesContents(data, true);
+      this.getTransFilesContents(data, {
+        "new": true
+      });
     },
     openSearchModal: function openSearchModal() {
       this.modalSearchOpen = true;
@@ -21866,10 +21871,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         console.log(error);
       });
     },
-    getMeta: function getMeta(orginalVal, orginalKey, addNewTrans) {
-      return {
+    getMeta: function getMeta(orginalVal, orginalKey) {
+      var initMeta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var meta = {
         visible: true,
-        "new": !!addNewTrans,
+        "new": false,
         deleted: false,
         selected: false,
         modified: {
@@ -21880,6 +21886,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         orginalKey: orginalKey,
         error: ''
       };
+      if (Object.keys(initMeta).length) {
+        for (var prop in initMeta) {
+          meta[prop] = initMeta[prop];
+        }
+      }
+      return meta;
     },
     getTransFilesContentsData: function getTransFilesContentsData() {
       var _this3 = this;
@@ -21890,8 +21902,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         console.log(error);
       });
     },
-    getTransFilesContents: function getTransFilesContents(data, addNewTrans) {
+    getTransFilesContents: function getTransFilesContents(data) {
+      var initMeta = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var transFilesContents = this.transFilesContents;
+      var addNewTrans = initMeta["new"];
       for (var prop in data) {
         if (!addNewTrans) {
           transFilesContents[prop] = [];
@@ -21903,7 +21917,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             var keyVal = _step2.value;
             var key = keyVal.key;
             var val = keyVal.val;
-            var meta = this.getMeta(val, key, addNewTrans);
+            var meta = this.getMeta(val, key, initMeta);
             var modified = {
               meta: meta,
               val: val,

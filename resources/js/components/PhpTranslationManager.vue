@@ -405,7 +405,7 @@ export default {
                     val: 'new'
                 }]
             };
-            this.getTransFilesContents(data, true);
+            this.getTransFilesContents(data, { new: true });
         },
         openSearchModal: function () {
             this.modalSearchOpen = true;
@@ -457,10 +457,10 @@ export default {
                     console.log(error);
                 });
         },
-        getMeta: function (orginalVal, orginalKey, addNewTrans) {
-            return {
+        getMeta: function (orginalVal, orginalKey, initMeta = {}) {
+            var meta = {
                 visible: true,
-                new: !!addNewTrans,
+                new: false,
                 deleted: false,
                 selected: false,
                 modified: { key: false, val: false },
@@ -468,6 +468,12 @@ export default {
                 orginalKey: orginalKey,
                 error: '',
             };
+            if (Object.keys(initMeta).length) {
+                for (const prop in initMeta) {
+                    meta[prop] = initMeta[prop];
+                }
+            }
+            return meta;
         },
         getTransFilesContentsData: function () {
             axios
@@ -479,8 +485,9 @@ export default {
                     console.log(error);
                 });
         },
-        getTransFilesContents: function (data, addNewTrans) {
+        getTransFilesContents: function (data, initMeta = {}) {
             var transFilesContents = this.transFilesContents;
+            var addNewTrans = initMeta.new;
             for (const prop in data) {
                 if (!addNewTrans) {
                     transFilesContents[prop] = [];
@@ -488,7 +495,7 @@ export default {
                 for (const keyVal of data[prop]) {
                     var key = keyVal.key;
                     var val = keyVal.val;
-                    var meta = this.getMeta(val, key, addNewTrans);
+                    var meta = this.getMeta(val, key, initMeta);
                     var modified = {
                         meta: meta,
                         val: val,

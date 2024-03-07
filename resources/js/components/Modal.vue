@@ -106,7 +106,7 @@ export default {
                             val: 'new'
                         }]
                     };
-                    this.getTransFilesContents(data, true);
+                    this.getTransFilesContents(data, { new: true, selected: true });
                     val.added = true;
                 }
             }
