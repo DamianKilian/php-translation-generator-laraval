@@ -53,6 +53,19 @@
                                 </div>
                             </div>
                             <div class="app-btn">
+                                <div class="app-tooltip">Translate</div>
+                                <div class="btn-confirm-wrapper">
+                                    <div @click="confirmClose($event, true); confirmTranslateOpen = !confirmTranslateOpen"
+                                        class="search btn-icon">
+                                        <span class="text-primary">&#10002;</span>
+                                    </div>
+                                    <div :class="{ open: confirmTranslateOpen }" class="confirm text-bg-dark p-2">
+                                        <button @click="" type="button" class="btn btn-primary float-end">Translate for
+                                            "{{ langCode }}"</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="app-btn">
                                 <div class="app-tooltip">Save</div>
                                 <div class="btn-confirm-wrapper">
                                     <div @click="confirmClose($event, true); confirmSaveOpen = !confirmSaveOpen"
@@ -211,6 +224,7 @@ export default {
             sidePanelOpen: false,
             confirmSaveOpen: false,
             confirmSearchOpen: false,
+            confirmTranslateOpen: false,
             transFilesContents: {},
         }
     },
@@ -511,6 +525,7 @@ export default {
         },
         confirmClose: function (e, force = false) {
             if (force || !e.target.closest(".btn-confirm-wrapper")) {
+                this.confirmTranslateOpen = false;
                 this.confirmSearchOpen = false;
                 this.confirmSaveOpen = false;
             }
