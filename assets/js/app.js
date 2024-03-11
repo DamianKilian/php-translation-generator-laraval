@@ -21481,8 +21481,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   computed: {
     numOfStrToTranslatePercent: function numOfStrToTranslatePercent() {
-      console.debug(100 - Math.round(this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100 * 100) / 100); //mmmyyy
-      return 100 - Math.round(this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100 * 100) / 100;
+      return parseInt(100 - this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100);
     }
   },
   methods: {
