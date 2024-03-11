@@ -8,6 +8,16 @@ use org\bovigo\vfs\vfsStream;
 
 class TransTest extends TestCase
 {
+    public function test_translate()
+    {
+        $gt = $this->createStub(\Stichoza\GoogleTranslate\GoogleTranslate::class);
+        $gt->method('translate')
+            ->willReturn('przykładowy tekst');
+        $phpTranslationManagerService = new PhpTranslationManagerService();
+
+        $this->assertTrue(['pl.json' => 'przykładowy tekst'] === $phpTranslationManagerService->translate($gt, 'example text', 'pl', 'google', 'en'));
+    }
+
     public function test_search()
     {
         $enJson = [

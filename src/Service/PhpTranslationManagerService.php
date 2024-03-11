@@ -10,7 +10,7 @@ class PhpTranslationManagerService
     protected $langPath;
     protected $searchLocations;
 
-    public function __construct($langPath = [], $searchLocations = [])
+    public function __construct($langPath = '', $searchLocations = [])
     {
         $this->langPath = $langPath;
         $this->searchLocations = $searchLocations;
