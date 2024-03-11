@@ -7,6 +7,7 @@ Route::prefix('phptranslationmanager')->group(function () {
     Route::post('/get-trans-files-contents-data', [PhpTranslationManagerController::class, 'getTransFilesContentsData'])->name('get-trans-files-contents-data');
     Route::post('/save-trans-files', [PhpTranslationManagerController::class, 'saveTransFiles'])->name('save-trans-files');
     Route::post('/search', [PhpTranslationManagerController::class, 'search'])->name('search');
+    Route::post('/translate', [PhpTranslationManagerController::class, 'translate'])->name('translate');
     Route::get('/', [PhpTranslationManagerController::class, 'phptranslationmanager']);
     Route::get('/js', [AssetController::class, 'js'])->name('js');
     Route::get('/css', [AssetController::class, 'css'])->name('css');

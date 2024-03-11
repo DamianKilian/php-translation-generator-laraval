@@ -25,5 +25,8 @@
         "phpunit/phpunit": "^10",
         "illuminate/support": ">=6.0",
         "mikey179/vfsstream": "^1.6"
+    },
+    "require": {
+        "stichoza/google-translate-php": "^5.1"
     }
 }

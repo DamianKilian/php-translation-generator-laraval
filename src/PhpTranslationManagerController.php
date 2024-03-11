@@ -5,6 +5,7 @@ namespace PhpTranslationManagerLaravel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use PhpTranslationManagerLaravel\Service\PhpTranslationManagerService;
+use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class PhpTranslationManagerController extends Controller
 {
@@ -42,4 +43,14 @@ class PhpTranslationManagerController extends Controller
             'searchResults' => $phpTranslationManagerService->search($request->langCode),
         ]);
     }
+
+    public function translate(Request $request, PhpTranslationManagerService $phpTranslationManagerService, GoogleTranslate $gt)
+    {
+        $code = substr($request->langCode, 0, -5);
+        $config = config('phptranslationmanagerlaravel');
+        return response()->json([
+            'strTrans' => $phpTranslationManagerService->translate($gt, $request->str, $code, $config['translation_api'], $config['translate_from']),
+        ]);
+    }
+
 }

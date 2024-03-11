@@ -60,7 +60,8 @@
                                         <span class="text-primary">&#10002;</span>
                                     </div>
                                     <div :class="{ open: confirmTranslateOpen }" class="confirm text-bg-dark p-2">
-                                        <button @click="" type="button" class="btn btn-primary float-end">Translate for
+                                        <button @click="translate" type="button"
+                                            class="btn btn-primary float-end">Translate for
                                             "{{ langCode }}"</button>
                                     </div>
                                 </div>
@@ -169,15 +170,18 @@
                                 <textarea :class="{ 'text-danger': '' !== val.meta.error }"
                                     class="form-control key-textarea key-val-textarea p-3" rows="3"
                                     @focus="textareaInputBlocked = false"
-                                    @input="e => { translationModified(e, arrkey, 'key') }" :data-arrkey="arrkey"
+                                    @blur="translationModifiedEntry($event, arrkey, 'key')"
+                                    @input="translationModifiedEntry($event, arrkey, 'key')" :data-arrkey="arrkey"
                                     data-type="key">{{ val['key'] }}</textarea>
                             </div>
                         </div>
                         <div class="col p-2" :class="{ 'bg-warning': val.meta.modified.val }">
                             <div class="trans">
-                                <textarea class="form-control val-textarea key-val-textarea p-3" rows="3"
+                                <textarea :id="'val-textarea' + arrkey"
+                                    class="form-control val-textarea key-val-textarea p-3" rows="3"
                                     @focus="textareaInputBlocked = false"
-                                    @input="e => { translationModified(e, arrkey, 'val') }" :data-arrkey="arrkey"
+                                    @blur="translationModifiedEntry($event, arrkey, 'val')"
+                                    @input="translationModifiedEntry($event, arrkey, 'val')" :data-arrkey="arrkey"
                                     data-type="val">{{ val['val'] }}</textarea>
                             </div>
                         </div>
@@ -185,9 +189,10 @@
                 </div>
             </div>
         </div>
-        <Modal v-if="modalMsg.msg || modalSearchOpen" :searchResults="searchResults" :modalSearchOpen="modalSearchOpen"
-            :closeModal="closeModal" :getTransFilesContents="getTransFilesContents" :modalMsg="modalMsg"
-            :langCode="langCode" :getKeys="getKeys" :transFilesContents="transFilesContents" />
+        <Modal v-if="modalMsg.msg || modalSearchOpen || numOfStrToTranslate" :searchResults="searchResults"
+            :modalSearchOpen="modalSearchOpen" :closeModal="closeModal" :getTransFilesContents="getTransFilesContents"
+            :modalMsg="modalMsg" :langCode="langCode" :getKeys="getKeys" :transFilesContents="transFilesContents"
+            :numOfStrToTranslate="numOfStrToTranslate" />
     </div>
 </template>
 
@@ -203,6 +208,7 @@ export default {
         getTransFilesContentsDataUrl: String,
         saveTransFilesUrl: String,
         searchUrl: String,
+        translateUrl: String,
     },
     data() {
         return {
@@ -226,6 +232,7 @@ export default {
             confirmSearchOpen: false,
             confirmTranslateOpen: false,
             transFilesContents: {},
+            numOfStrToTranslate: 0,
         }
     },
     computed: {
@@ -238,6 +245,32 @@ export default {
     },
     methods: {
         filterErrors,
+        translate: function () {
+            var selectedTrans = this.getSelectedTrans();
+            this.numOfStrToTranslate = selectedTrans.length;
+            if (!this.numOfStrToTranslate) {
+                return;
+            }
+            for (const trans of selectedTrans) {
+                axios
+                    .post(this.translateUrl, { str: trans.key, langCode: this.langCode })
+                    .then((response) => {
+                        var strTrans = response.data.strTrans;
+                        if (undefined !== strTrans[this.langCode]) {
+                            const valTextarea = document.getElementById('val-textarea' + trans.currentKey);
+                            valTextarea.value = strTrans[this.langCode];
+                            this.textareaInputEvent(valTextarea);
+                        }
+                        this.numOfStrToTranslate--;
+                    }).catch((error) => {
+                        console.log(error);
+                    });
+            }
+        },
+        textareaInputEvent: function (textarea) {
+            this.textareaInputBlocked = false;
+            textarea.dispatchEvent(new Event("blur"));
+        },
         resetTrans: function (e, arrkey) {
             var keyRecord = this.transFilesContents[this.langCode][arrkey];
             var orginalVal = keyRecord.meta.orginalVal;
@@ -250,12 +283,12 @@ export default {
                 if (valTextarea.value !== orginalVal) {
                     this.historyStorageBlock = true;
                     valTextarea.value = orginalVal;
-                    valTextarea.dispatchEvent(new Event('input'));
+                    this.textareaInputEvent(valTextarea);
                 }
                 if (keyTextarea.value !== orginalKey) {
                     this.historyStorageBlock = true;
                     keyTextarea.value = orginalKey;
-                    keyTextarea.dispatchEvent(new Event('input'));
+                    this.textareaInputEvent(keyTextarea);
                 }
             }
         },
@@ -276,7 +309,10 @@ export default {
         },
         syncTextareaValues: function () {
             document.querySelectorAll('.key-val-textarea').forEach(function (textarea) {
-                textarea.value = this.transFilesContents[this.langCode][textarea.dataset.arrkey][textarea.dataset.type];
+                var keyRecord = this.transFilesContents[this.langCode][textarea.dataset.arrkey];
+                if (undefined !== keyRecord) {
+                    textarea.value = keyRecord[textarea.dataset.type];
+                }
             }, this);
         },
         storeHistory: function () {
@@ -416,7 +452,7 @@ export default {
             var data = {
                 [this.langCode]: [{
                     key: newKey,
-                    val: 'new'
+                    val: '( new )'
                 }]
             };
             this.getTransFilesContents(data, { new: true });
@@ -530,7 +566,14 @@ export default {
                 this.confirmSaveOpen = false;
             }
         },
-        translationModified: _.debounce(function (e, arrkey, type) {
+        translationModifiedEntry: function (e, arrkey, type) {
+            if ('blur' === e.type) {
+                this.translationModified(e, arrkey, type);
+            } else {
+                this.translationModifiedDebounce(e, arrkey, type);
+            }
+        },
+        translationModified: function (e, arrkey, type) {
             if (this.textareaInputBlocked) {
                 return;
             }
@@ -550,6 +593,9 @@ export default {
                 this.changeVal(keyRecord, newVal);
             }
             this.reCheckDuplicateKeys();
+        },
+        translationModifiedDebounce: _.debounce(function (e, arrkey, type) {
+            this.translationModified(e, arrkey, type);
         }, 500),
         reCheckDuplicateKeys: function () {
             var duplicateKeyRecords = this.duplicateKeyRecords;

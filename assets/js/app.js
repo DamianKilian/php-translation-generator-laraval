@@ -21470,12 +21470,20 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     modalMsg: Object,
     searchResults: Object,
     modalSearchOpen: Boolean,
-    langCode: Boolean
+    langCode: Boolean,
+    numOfStrToTranslate: Number
   },
   data: function data() {
     return {
+      numOfStrToTranslateInitial: this.numOfStrToTranslate,
       error: ''
     };
+  },
+  computed: {
+    numOfStrToTranslatePercent: function numOfStrToTranslatePercent() {
+      console.debug(100 - Math.round(this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100 * 100) / 100); //mmmyyy
+      return 100 - Math.round(this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100 * 100) / 100;
+    }
   },
   methods: {
     selectAllResults: function selectAllResults(e) {
@@ -21539,7 +21547,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             }
             var data = _defineProperty({}, this.langCode, [{
               key: val.trans,
-              val: 'new'
+              val: '( new )'
             }]);
             this.getTransFilesContents(data, {
               "new": true,
@@ -21574,12 +21582,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./phpTranslationManager/filters.js */ "./resources/js/components/phpTranslationManager/filters.js");
 /* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : String(i); }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -21589,7 +21597,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   props: {
     getTransFilesContentsDataUrl: String,
     saveTransFilesUrl: String,
-    searchUrl: String
+    searchUrl: String,
+    translateUrl: String
   },
   data: function data() {
     return {
@@ -21612,7 +21621,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       confirmSaveOpen: false,
       confirmSearchOpen: false,
       confirmTranslateOpen: false,
-      transFilesContents: {}
+      transFilesContents: {},
+      numOfStrToTranslate: 0
     };
   },
   computed: {
@@ -21625,6 +21635,46 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   },
   methods: {
     filterErrors: _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__.filterErrors,
+    translate: function translate() {
+      var _this = this;
+      var selectedTrans = this.getSelectedTrans();
+      this.numOfStrToTranslate = selectedTrans.length;
+      if (!this.numOfStrToTranslate) {
+        return;
+      }
+      var _iterator = _createForOfIteratorHelper(selectedTrans),
+        _step;
+      try {
+        var _loop = function _loop() {
+          var trans = _step.value;
+          axios.post(_this.translateUrl, {
+            str: trans.key,
+            langCode: _this.langCode
+          }).then(function (response) {
+            var strTrans = response.data.strTrans;
+            if (undefined !== strTrans[_this.langCode]) {
+              var valTextarea = document.getElementById('val-textarea' + trans.currentKey);
+              valTextarea.value = strTrans[_this.langCode];
+              _this.textareaInputEvent(valTextarea);
+            }
+            _this.numOfStrToTranslate--;
+          })["catch"](function (error) {
+            console.log(error);
+          });
+        };
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          _loop();
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    },
+    textareaInputEvent: function textareaInputEvent(textarea) {
+      this.textareaInputBlocked = false;
+      textarea.dispatchEvent(new Event("blur"));
+    },
     resetTrans: function resetTrans(e, arrkey) {
       var keyRecord = this.transFilesContents[this.langCode][arrkey];
       var orginalVal = keyRecord.meta.orginalVal;
@@ -21637,12 +21687,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         if (valTextarea.value !== orginalVal) {
           this.historyStorageBlock = true;
           valTextarea.value = orginalVal;
-          valTextarea.dispatchEvent(new Event('input'));
+          this.textareaInputEvent(valTextarea);
         }
         if (keyTextarea.value !== orginalKey) {
           this.historyStorageBlock = true;
           keyTextarea.value = orginalKey;
-          keyTextarea.dispatchEvent(new Event('input'));
+          this.textareaInputEvent(keyTextarea);
         }
       }
     },
@@ -21663,7 +21713,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     },
     syncTextareaValues: function syncTextareaValues() {
       document.querySelectorAll('.key-val-textarea').forEach(function (textarea) {
-        textarea.value = this.transFilesContents[this.langCode][textarea.dataset.arrkey][textarea.dataset.type];
+        var keyRecord = this.transFilesContents[this.langCode][textarea.dataset.arrkey];
+        if (undefined !== keyRecord) {
+          textarea.value = keyRecord[textarea.dataset.type];
+        }
       }, this);
     },
     storeHistory: function storeHistory() {
@@ -21805,7 +21858,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       } while (this.getKeys(this.transFilesContents[this.langCode]).indexOf(newKey) > -1);
       var data = _defineProperty({}, this.langCode, [{
         key: newKey,
-        val: 'new'
+        val: '( new )'
       }]);
       this.getTransFilesContents(data, {
         "new": true
@@ -21817,13 +21870,13 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       document.body.classList.add('overflow-hidden');
     },
     searchTrans: function searchTrans() {
-      var _this = this;
+      var _this2 = this;
       this.openSearchModal();
       axios.post(this.searchUrl, {
         langCode: this.langCode
       }).then(function (response) {
         var langCode = Object.keys(response.data.searchResults)[0];
-        _this.searchResults[langCode] = _this.searchResultsAddMeta(response.data.searchResults[langCode]);
+        _this2.searchResults[langCode] = _this2.searchResultsAddMeta(response.data.searchResults[langCode]);
       })["catch"](function (error) {
         console.log(error);
       });
@@ -21832,11 +21885,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       var searchResultsWithMeta = {};
       for (var location in searchResults) {
         searchResultsWithMeta[location] = [];
-        var _iterator = _createForOfIteratorHelper(searchResults[location]),
-          _step;
+        var _iterator2 = _createForOfIteratorHelper(searchResults[location]),
+          _step2;
         try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var trans = _step.value;
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var trans = _step2.value;
             searchResultsWithMeta[location].push({
               trans: trans,
               selected: false,
@@ -21844,26 +21897,26 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             });
           }
         } catch (err) {
-          _iterator.e(err);
+          _iterator2.e(err);
         } finally {
-          _iterator.f();
+          _iterator2.f();
         }
       }
       return searchResultsWithMeta;
     },
     saveTransFiles: function saveTransFiles() {
-      var _this2 = this;
+      var _this3 = this;
       var data = {};
       data[this.langCode] = this.transFilesContents[this.langCode];
       axios.post(this.saveTransFilesUrl, {
         trans: data
       }).then(function (response) {
         if (response.data.success) {
-          _this2.getTransFilesContents(response.data.transFilesContents);
-          _this2.filterErrorsOn = false;
-          _this2.confirmSaveOpen = false;
+          _this3.getTransFilesContents(response.data.transFilesContents);
+          _this3.filterErrorsOn = false;
+          _this3.confirmSaveOpen = false;
         } else {
-          _this2.modalMsg = {
+          _this3.modalMsg = {
             msg: response.data.error,
             type: 'error'
           };
@@ -21895,10 +21948,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       return meta;
     },
     getTransFilesContentsData: function getTransFilesContentsData() {
-      var _this3 = this;
+      var _this4 = this;
       axios.post(this.getTransFilesContentsDataUrl).then(function (response) {
-        _this3.setHistoryKeysGlobal(Object.keys(response.data.transFilesContents));
-        _this3.getTransFilesContents(response.data.transFilesContents);
+        _this4.setHistoryKeysGlobal(Object.keys(response.data.transFilesContents));
+        _this4.getTransFilesContents(response.data.transFilesContents);
       })["catch"](function (error) {
         console.log(error);
       });
@@ -21911,11 +21964,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         if (!addNewTrans) {
           transFilesContents[prop] = [];
         }
-        var _iterator2 = _createForOfIteratorHelper(data[prop]),
-          _step2;
+        var _iterator3 = _createForOfIteratorHelper(data[prop]),
+          _step3;
         try {
-          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-            var keyVal = _step2.value;
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var keyVal = _step3.value;
             var key = keyVal.key;
             var val = keyVal.val;
             var meta = this.getMeta(val, key, initMeta);
@@ -21931,9 +21984,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             }
           }
         } catch (err) {
-          _iterator2.e(err);
+          _iterator3.e(err);
         } finally {
-          _iterator2.f();
+          _iterator3.f();
         }
       }
     },
@@ -21945,7 +21998,14 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         this.confirmSaveOpen = false;
       }
     },
-    translationModified: _.debounce(function (e, arrkey, type) {
+    translationModifiedEntry: function translationModifiedEntry(e, arrkey, type) {
+      if ('blur' === e.type) {
+        this.translationModified(e, arrkey, type);
+      } else {
+        this.translationModifiedDebounce(e, arrkey, type);
+      }
+    },
+    translationModified: function translationModified(e, arrkey, type) {
       if (this.textareaInputBlocked) {
         return;
       }
@@ -21965,6 +22025,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         this.changeVal(keyRecord, newVal);
       }
       this.reCheckDuplicateKeys();
+    },
+    translationModifiedDebounce: _.debounce(function (e, arrkey, type) {
+      this.translationModified(e, arrkey, type);
     }, 500),
     reCheckDuplicateKeys: function reCheckDuplicateKeys() {
       var duplicateKeyRecords = this.duplicateKeyRecords;
@@ -22012,12 +22075,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       keyRecord.meta.error = '';
     },
     gettingLangCodeFromTabs: function gettingLangCodeFromTabs() {
-      var _this4 = this;
+      var _this5 = this;
       this.langCode = document.querySelector('.nav-tabs .active').dataset.langCode;
       var tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
       tabEls.forEach(function (tabEl) {
         tabEl.addEventListener('shown.bs.tab', function (e) {
-          _this4.langCode = e.target.dataset.langCode;
+          _this5.langCode = e.target.dataset.langCode;
         });
       });
     }
@@ -22144,6 +22207,13 @@ var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "visually-hidden"
 }, "Loading...")], -1 /* HOISTED */);
 var _hoisted_23 = [_hoisted_22];
+var _hoisted_24 = {
+  key: 2,
+  "class": "app-modal translate"
+};
+var _hoisted_25 = {
+  "class": "progress"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [$props.modalMsg.msg ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, ['error' === this.modalMsg.type ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_2, " ⚠ ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
@@ -22179,7 +22249,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         }
       }, null, 8 /* PROPS */, _hoisted_19), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, trans.selected]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(trans.trans), 1 /* TEXT */)]);
     }), 256 /* UNKEYED_FRAGMENT */))]);
-  }), 256 /* UNKEYED_FRAGMENT */))])) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [].concat(_hoisted_23)))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }), 256 /* UNKEYED_FRAGMENT */))])) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [].concat(_hoisted_23)))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.numOfStrToTranslate ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": "progress-bar",
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)({
+      width: $options.numOfStrToTranslatePercent + '%'
+    })
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.numOfStrToTranslatePercent + '%'), 5 /* TEXT, STYLE */)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     className: "app-modal-backdrop",
     onClick: _cache[4] || (_cache[4] = function () {
       return $props.closeModal && $props.closeModal.apply($props, arguments);
@@ -22413,11 +22488,11 @@ var _hoisted_61 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "app-tooltip"
 }, "Reset", -1 /* HOISTED */);
 var _hoisted_62 = [_hoisted_60, _hoisted_61];
-var _hoisted_63 = ["onInput", "data-arrkey"];
+var _hoisted_63 = ["onBlur", "onInput", "data-arrkey"];
 var _hoisted_64 = {
   "class": "trans"
 };
-var _hoisted_65 = ["onInput", "data-arrkey"];
+var _hoisted_65 = ["id", "onBlur", "onInput", "data-arrkey"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _this = this;
   var _component_Modal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Modal");
@@ -22480,7 +22555,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         open: $data.confirmTranslateOpen
       }, "confirm text-bg-dark p-2"])
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-      onClick: _cache[4] || (_cache[4] = function () {}),
+      onClick: _cache[4] || (_cache[4] = function () {
+        return $options.translate && $options.translate.apply($options, arguments);
+      }),
       type: "button",
       "class": "btn btn-primary float-end"
     }, "Translate for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\"", 1 /* TEXT */)], 2 /* CLASS */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [_hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
@@ -22585,8 +22662,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onFocus: _cache[13] || (_cache[13] = function ($event) {
           return $data.textareaInputBlocked = false;
         }),
-        onInput: function onInput(e) {
-          $options.translationModified(e, arrkey, 'key');
+        onBlur: function onBlur($event) {
+          return $options.translationModifiedEntry($event, arrkey, 'key');
+        },
+        onInput: function onInput($event) {
+          return $options.translationModifiedEntry($event, arrkey, 'key');
         },
         "data-arrkey": arrkey,
         "data-type": "key"
@@ -22595,19 +22675,23 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           'bg-warning': val.meta.modified.val
         }])
       }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_64, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
+        id: 'val-textarea' + arrkey,
         "class": "form-control val-textarea key-val-textarea p-3",
         rows: "3",
         onFocus: _cache[14] || (_cache[14] = function ($event) {
           return $data.textareaInputBlocked = false;
         }),
-        onInput: function onInput(e) {
-          $options.translationModified(e, arrkey, 'val');
+        onBlur: function onBlur($event) {
+          return $options.translationModifiedEntry($event, arrkey, 'val');
+        },
+        onInput: function onInput($event) {
+          return $options.translationModifiedEntry($event, arrkey, 'val');
         },
         "data-arrkey": arrkey,
         "data-type": "val"
       }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(val['val']), 41 /* TEXT, PROPS, NEED_HYDRATION */, _hoisted_65)])], 2 /* CLASS */)], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))])])], 10 /* CLASS, PROPS */, _hoisted_3);
-  }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg || $data.modalSearchOpen ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
+  }), 256 /* UNKEYED_FRAGMENT */)), $data.modalMsg.msg || $data.modalSearchOpen || $data.numOfStrToTranslate ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Modal, {
     key: 0,
     searchResults: $data.searchResults,
     modalSearchOpen: $data.modalSearchOpen,
@@ -22616,8 +22700,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     modalMsg: $data.modalMsg,
     langCode: $data.langCode,
     getKeys: $options.getKeys,
-    transFilesContents: $data.transFilesContents
-  }, null, 8 /* PROPS */, ["searchResults", "modalSearchOpen", "closeModal", "getTransFilesContents", "modalMsg", "langCode", "getKeys", "transFilesContents"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])], 64 /* STABLE_FRAGMENT */);
+    transFilesContents: $data.transFilesContents,
+    numOfStrToTranslate: $data.numOfStrToTranslate
+  }, null, 8 /* PROPS */, ["searchResults", "modalSearchOpen", "closeModal", "getTransFilesContents", "modalMsg", "langCode", "getKeys", "transFilesContents", "numOfStrToTranslate"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),

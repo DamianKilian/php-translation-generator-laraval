@@ -2,6 +2,8 @@
 
 namespace PhpTranslationManagerLaravel\Service;
 
+use Stichoza\GoogleTranslate\GoogleTranslate;
+
 class PhpTranslationManagerService
 {
     const ERR_MSG = 'Duplicate key';
@@ -12,6 +14,16 @@ class PhpTranslationManagerService
     {
         $this->langPath = $langPath;
         $this->searchLocations = $searchLocations;
+    }
+
+    public function translate(GoogleTranslate $gt, $str, $code, $translationApi, $translateFrom)
+    {
+        if ('google' === $translationApi) {
+            $gt->setSource($translateFrom);
+            $gt->setTarget($code);
+            $trans = $gt->translate($str);
+            return ["$code.json" => $trans];
+        }
     }
 
     public function search($langCode)

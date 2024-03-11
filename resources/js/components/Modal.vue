@@ -43,6 +43,13 @@
             </div>
         </div>
     </div>
+    <div class='app-modal translate' v-if="numOfStrToTranslate">
+        <div class="progress">
+            <div class="progress-bar" :style="{ width: numOfStrToTranslatePercent + '%' }">
+                {{ numOfStrToTranslatePercent + '%' }}
+            </div>
+        </div>
+    </div>
     <div className='app-modal-backdrop' @click="closeModal"></div>
 </template>
 
@@ -57,10 +64,18 @@ export default {
         searchResults: Object,
         modalSearchOpen: Boolean,
         langCode: Boolean,
+        numOfStrToTranslate: Number,
     },
     data() {
         return {
+            numOfStrToTranslateInitial: this.numOfStrToTranslate,
             error: '',
+        }
+    },
+    computed: {
+        numOfStrToTranslatePercent() {
+            console.debug(100 - (Math.round(this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100 * 100) / 100));//mmmyyy
+            return 100 - (Math.round(this.numOfStrToTranslate / this.numOfStrToTranslateInitial * 100 * 100) / 100);
         }
     },
     methods: {
@@ -103,7 +118,7 @@ export default {
                     var data = {
                         [this.langCode]: [{
                             key: val.trans,
-                            val: 'new'
+                            val: '( new )'
                         }]
                     };
                     this.getTransFilesContents(data, { new: true, selected: true });

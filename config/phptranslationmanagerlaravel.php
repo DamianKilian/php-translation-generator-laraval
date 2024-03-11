@@ -11,6 +11,8 @@ END;
 $ferp = function_exists('resource_path');
 
 return [
+    'translate_from' => 'en',
+    'translation_api' => 'google',
     'lang_path' => $ferp ? resource_path() . '/lang' : null,
     'search_locations' => [
         '/resources/views' => [

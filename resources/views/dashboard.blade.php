@@ -9,6 +9,7 @@
 <body>
     <div id="app">
         <php-translation-manager save-trans-files-url="{{ route('save-trans-files') }}" search-url="{{ route('search') }}"
+            translate-url="{{ route('translate') }}"
             get-trans-files-contents-data-url="{{ route('get-trans-files-contents-data') }}"></php-translation-manager>
     </div>
     <script src="{{ route('js') }}"></script>
