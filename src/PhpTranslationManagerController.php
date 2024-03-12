@@ -2,12 +2,11 @@
 
 namespace PhpTranslationManagerLaravel;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use PhpTranslationManagerLaravel\Service\PhpTranslationManagerService;
 use Stichoza\GoogleTranslate\GoogleTranslate;
 
-class PhpTranslationManagerController extends Controller
+class PhpTranslationManagerController
 {
     public function getTransFilesContentsData(PhpTranslationManagerService $phpTranslationManagerService)
     {
