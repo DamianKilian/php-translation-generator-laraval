@@ -24,7 +24,8 @@
     "require-dev": {
         "phpunit/phpunit": "^10",
         "illuminate/support": ">=6.0",
-        "mikey179/vfsstream": "^1.6"
+        "mikey179/vfsstream": "^1.6",
+        "orchestra/testbench": "*"
     },
     "require": {
         "stichoza/google-translate-php": "^5.1"

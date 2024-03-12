@@ -79,20 +79,32 @@ class TransTest extends TestCase
     {
         $transFilesContents = array(
             'en.json' => array(
-                array('key' => 'k1', 'val' => 'v1',),
-                array('key' => 'k2', 'val' => 'v2',),
-                array('key' => 'k3', 'val' => 'v3',),
+                ['key' => 'k1', 'val' => 'v1',],
+                ['key' => 'k2', 'val' => 'v2',],
+                ['key' => 'k3', 'val' => 'v3',],
             ),
             'pl.json' => array(
-                array('key' => 'k1', 'val' => 'v1',),
-                array('key' => 'k2', 'val' => 'v2',),
-                array('key' => 'k3', 'val' => 'v3',),
+                ['key' => 'k1', 'val' => 'v1',],
+                ['key' => 'k2', 'val' => 'v2',],
+                ['key' => 'k3', 'val' => 'v3',],
+            ),
+        );
+        $transFilesContentsWithMeta = array(
+            'en.json' => array(
+                ['key' => 'k1', 'val' => 'v1', 'meta' => ['deleted' => false],],
+                ['key' => 'k2', 'val' => 'v2', 'meta' => ['deleted' => false],],
+                ['key' => 'k3', 'val' => 'v3', 'meta' => ['deleted' => false],],
+            ),
+            'pl.json' => array(
+                ['key' => 'k1', 'val' => 'v1', 'meta' => ['deleted' => false],],
+                ['key' => 'k2', 'val' => 'v2', 'meta' => ['deleted' => false],],
+                ['key' => 'k3', 'val' => 'v3', 'meta' => ['deleted' => false],],
             ),
         );
         $root = vfsStream::setup('exampleDir');
         $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'));
 
-        $this->assertTrue($transFilesContents == $phpTranslationManagerService->saveTransFiles($transFilesContents));
+        $this->assertTrue($transFilesContents == $phpTranslationManagerService->saveTransFiles($transFilesContentsWithMeta));
         $this->assertTrue($transFilesContents === $phpTranslationManagerService->getTransFilesContents());
     }
 
@@ -144,10 +156,10 @@ class TransTest extends TestCase
         $phpTranslationManagerService = new PhpTranslationManagerService('');
         $testArrWrapped = [
             ['key' => 'kdel1', 'val' => 'vdel1', 'meta' => ['deleted' => true],],
-            ['key' => 'k1', 'val' => 'v1'],
+            ['key' => 'k1', 'val' => 'v1', 'meta' => ['deleted' => false],],
             ['key' => 'kdel2', 'val' => 'vdel2', 'meta' => ['deleted' => true],],
-            ['key' => 'k2', 'val' => 'v2'],
-            ['key' => 'k3', 'val' => 'v3'],
+            ['key' => 'k2', 'val' => 'v2', 'meta' => ['deleted' => false],],
+            ['key' => 'k3', 'val' => 'v3', 'meta' => ['deleted' => false],],
             ['key' => 'kdel2', 'val' => 'vdel2', 'meta' => ['deleted' => true],],
         ];
         $testArr = [
@@ -165,10 +177,10 @@ class TransTest extends TestCase
     {
         $phpTranslationManagerService = new PhpTranslationManagerService('');
         $testArrWrapped = [
-            ['key' => 'k1', 'val' => 'v1'],
-            ['key' => 'k2', 'val' => 'v2'],
-            ['key' => 'k2', 'val' => 'v2'],
-            ['key' => 'k3', 'val' => 'v3'],
+            ['key' => 'k1', 'val' => 'v1', 'meta' => ['deleted' => false],],
+            ['key' => 'k2', 'val' => 'v2', 'meta' => ['deleted' => false],],
+            ['key' => 'k2', 'val' => 'v2', 'meta' => ['deleted' => false],],
+            ['key' => 'k3', 'val' => 'v3', 'meta' => ['deleted' => false],],
         ];
 
         $this->expectException(\Exception::class);

@@ -16,7 +16,7 @@ class PhpTranslationManagerController extends Controller
         ]);
     }
 
-    public function phptranslationmanager(PhpTranslationManagerService $phpTranslationManagerService)
+    public function phptranslationmanager()
     {
         return view('php-translation-manager-laravel::dashboard');
     }
