@@ -1,5 +1,8 @@
 {
     "name": "damian/php-translation-manager-laravel",
+    "description": "A development tool for managing laravel translations",
+    "type": "library",
+    "license": "MIT",
     "authors": [
         {
             "name": "Damian Kilian",
@@ -19,7 +22,7 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "require-dev": {
         "phpunit/phpunit": "^10",
