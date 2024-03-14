@@ -8,23 +8,21 @@ $trimRegex = <<<'END'
 /^__\(\s*'\s*|^__\(\s*"\s*|\s*'\s*\)$|\s*"\s*\)$/
 END;
 
-$testing = isset($GLOBALS['PhpTranslationManagerLaravel_testing']);
-
 return [
     'translate_from' => 'en',
     'translation_api' => 'google',
-    'lang_path' => !$testing ? resource_path() . '/lang' : null,
+    'lang_path' => resource_path() . '/lang',
     'search_locations' => [
         '/resources/views' => [
             'regex' => $regex,
             'trimRegex' => $trimRegex,
-            'path' => !$testing ? resource_path() . '/views' : null,
+            'path' => resource_path() . '/views',
             'file_extensions' => ['blade.php'],
         ],
         '/resources/js' => [
             'regex' => $regex,
             'trimRegex' => $trimRegex,
-            'path' => !$testing ? resource_path() . '/js' : null,
+            'path' => resource_path() . '/js',
             'file_extensions' => ['vue'],
         ],
     ]
