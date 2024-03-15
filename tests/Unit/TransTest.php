@@ -221,6 +221,15 @@ class TransTest extends TestCase
         $this->assertTrue($transFilesContents === $phpTranslationManagerService->getTransFilesContents());
     }
 
+    public function test_lang_path_error_getTransFilesContents()
+    {
+        vfsStream::setup('exampleDir');
+
+        $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir') . '/notSetDir');
+
+        $this->assertTrue(isset($phpTranslationManagerService->getTransFilesContents()['error']));
+    }
+
     /**
      * Call protected/private method of a class.
      *

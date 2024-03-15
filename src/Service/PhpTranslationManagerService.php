@@ -78,6 +78,9 @@ class PhpTranslationManagerService
 
     public function getTransFilesContents($wrapped = true, $langCodeFilter = '')
     {
+        if (!is_dir($this->langPath)) {
+            return ['error' => "Invalid 'lang_path' config value"];
+        }
         $transFiles = $this->streamSafeGlob($this->langPath, '*.json');
         $transFilesContents = [];
         foreach ($transFiles as $transFile) {

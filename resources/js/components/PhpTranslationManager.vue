@@ -1,4 +1,5 @@
 <template>
+    <div v-if="error" class="alert alert-danger">{{ error }}</div>
     <nav>
         <div class="nav nav-tabs" id="nav-tab">
             <button v-for="(langCode, index) in Object.keys(transFilesContents)" class="nav-link"
@@ -128,7 +129,7 @@
                                         &#8635;
                                     </span>
                                     <div class="numOnBtn">({{ historyKeysGlobal[this.langCode].historyLastKeyGlobal -
-                historyKeysGlobal[this.langCode].historyCurrKeyGlobal }})</div>
+        historyKeysGlobal[this.langCode].historyCurrKeyGlobal }})</div>
                                 </div>
                                 <div class="app-tooltip">Forth</div>
                             </div>
@@ -212,6 +213,7 @@ export default {
     },
     data() {
         return {
+            error: '',
             searchResults: {},
             modalSearchOpen: false,
             history: {
@@ -529,6 +531,10 @@ export default {
             axios
                 .post(this.getTransFilesContentsDataUrl)
                 .then((response) => {
+                    if (response.data.transFilesContents.error) {
+                        this.error = response.data.transFilesContents.error;
+                        return;
+                    }
                     this.setHistoryKeysGlobal(Object.keys(response.data.transFilesContents));
                     this.getTransFilesContents(response.data.transFilesContents);
                 }).catch((error) => {
@@ -658,6 +664,9 @@ export default {
         // console.debug(this.transFilesContents);//mmmyyy
     },
     updated() {
+        if (this.error) {
+            return;
+        }
         if (!this.langCode) {
             this.gettingLangCodeFromTabs();
         }
