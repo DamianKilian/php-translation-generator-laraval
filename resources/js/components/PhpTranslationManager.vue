@@ -22,7 +22,7 @@
                     </div>
                     <div class="btns px-3">
                         <div class="sticky-top">
-                            <div class="app-btn">
+                            <!-- <div class="app-btn">
                                 <div @click="sidePanelOpen = !sidePanelOpen" class="openSettings btn-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
                                         fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
@@ -34,7 +34,7 @@
                                     </svg>
                                 </div>
                                 <div class="app-tooltip">Settings</div>
-                            </div>
+                            </div> -->
                             <div class="app-btn">
                                 <div class="app-tooltip">Search</div>
                                 <div class="btn-confirm-wrapper">
@@ -52,6 +52,17 @@
                                             class="btn btn-primary float-end">Search for "{{ langCode }}"</button>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="app-btn">
+                                <div @click="filterUnusedTrans" class="btn-icon" v-if="unusedTrans.length !== 0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
+                                        fill="none" stroke="#9b9b9b" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                                        <path d="M14 3v5h5M9.9 17.1L14 13M9.9 12.9L14 17" />
+                                    </svg>
+                                </div>
+                                <div class="app-tooltip">Filter Errors</div>
                             </div>
                             <div class="app-btn">
                                 <div class="app-tooltip">Translate</div>
@@ -151,7 +162,19 @@
                         :key="val.meta.orginalKey">
                         <div class="col p-2"
                             :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white border-3': '' !== val.meta.error }">
-                            <b v-if="'' !== val.meta.error" class="text-danger">&#9888; {{ val.meta.error }}</b>
+                            <b v-if="'' !== val.meta.error" class="text-danger trans-info"><span
+                                    class="icon icon-html-entity">&#9888;</span>{{ val.meta.error
+                                }}</b>
+                            <b v-if="val.meta.unused" class="text-secondary trans-info">
+                                <span class="icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="#9b9b9b" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                                        <path d="M14 3v5h5M9.9 17.1L14 13M9.9 12.9L14 17" />
+                                    </svg>
+                                </span>Unused
+                            </b>
                             <div class="trans">
                                 <div class="actions">
                                     <input @change="selectAction($event, arrkey)" v-model="val['meta'].selected"
@@ -238,17 +261,20 @@ export default {
         }
     },
     computed: {
+        unusedTrans() {
+            return this.getTrans('unused');
+        },
         countSelectedTransNum() {
-            return this.getSelectedTrans().length;
+            return this.getTrans('selected').length;
         },
         duplicateKeyRecords() {
-            return this.getDuplicateKeyRecords();
+            return this.getTrans('error');
         }
     },
     methods: {
         filterErrors,
         translate: function () {
-            var selectedTrans = this.getSelectedTrans();
+            var selectedTrans = this.getTrans('selected');
             this.numOfStrToTranslate = selectedTrans.length;
             if (!this.numOfStrToTranslate) {
                 return;
@@ -366,7 +392,7 @@ export default {
                     selectedTrans.push(selectedTransProp[key]);
                 }
             } else if (!selectedTransProp.length) {
-                var selectedTrans = this.getSelectedTrans();
+                var selectedTrans = this.getTrans('selected');
             } else {
                 var selectedTrans = selectedTransProp;
             }
@@ -384,17 +410,6 @@ export default {
             if (!undelete && selectedTransDeleted.length === selectedTrans.length) {
                 this.deleteTrans(e, true, selectedTrans);
             }
-        },
-        getSelectedTrans: function () {
-            var selectedTrans = [];
-            for (const key in this.transFilesContents[this.langCode]) {
-                var trans = this.transFilesContents[this.langCode][key];
-                if (trans.meta.selected) {
-                    trans.currentKey = key;
-                    selectedTrans.push(trans);
-                }
-            }
-            return selectedTrans;
         },
         deselectTrans: function () {
             for (const key in this.transFilesContents[this.langCode]) {
@@ -515,6 +530,7 @@ export default {
                 new: false,
                 deleted: false,
                 selected: false,
+                unused: false,
                 modified: { key: false, val: false },
                 orginalVal: orginalVal,
                 orginalKey: orginalKey,
@@ -625,15 +641,16 @@ export default {
                 keyRecord.meta.modified.key = (newKey !== keyRecord.meta.orginalKey);
             }
         },
-        getDuplicateKeyRecords: function () {
-            var duplicateKeyRecords = [];
+        getTrans: function (metaKey) {
+            var trans = [];
             for (const key in this.transFilesContents[this.langCode]) {
-                var trans = this.transFilesContents[this.langCode][key];
-                if (trans.meta.error) {
-                    duplicateKeyRecords.push(trans);
+                var translation = this.transFilesContents[this.langCode][key];
+                if (translation.meta[metaKey]) {
+                    translation.currentKey = key;
+                    trans.push(translation);
                 }
             }
-            return duplicateKeyRecords;
+            return trans;
         },
         checkDuplicateKey: function (keyRecord, newKey) {
             var matches = 0;
