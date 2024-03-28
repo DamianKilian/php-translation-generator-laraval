@@ -24,6 +24,7 @@ class TransTest extends TestCase
             'k1' => 'v1',
             'k2' => 'v2',
             'k3' => 'v3',
+            'kUnused' => 'vUnused',
         ];
         $fileContent1 = <<<'EOD'
         foo bar __('toFind1') foo bar
@@ -61,18 +62,33 @@ class TransTest extends TestCase
         unset($config['/resources/js']);
         $config['/resources/views']['path'] = vfsStream::url('exampleDir') . '/resources/views';
         $phpTranslationManagerService = new PhpTranslationManagerService(vfsStream::url('exampleDir'), $config);
+
         $resultsService = $phpTranslationManagerService->search('en.json');
         $results = [
             'en.json' => [
-                '/resources/views' => [
-                    'toFind1',
-                    "to\'\'Find2",
-                    'toFind3',
-                    "to\'\'Find4",
-                ]
+                'foundTrans' => [
+                    '/resources/views' => [
+                        'toFind1',
+                        "to\'\'Find2",
+                        'toFind3',
+                        "to\'\'Find4",
+                    ]
+                ],
+                'unused' => [
+                    "k2" => "v2",
+                    'kUnused' => 'vUnused',
+                ],
             ]
         ];
-        $this->assertTrue([] === array_diff($resultsService['en.json']['/resources/views'], $results['en.json']['/resources/views']));
+
+        $this->assertTrue([] === array_diff(
+            $resultsService['en.json']['foundTrans']['/resources/views'],
+            $results['en.json']['foundTrans']['/resources/views']
+        ));
+        $this->assertTrue([] === array_diff(
+            $resultsService['en.json']['unused'],
+            $results['en.json']['unused']
+        ));
     }
 
     public function test_saveTransFiles()

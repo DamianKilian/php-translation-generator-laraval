@@ -21618,6 +21618,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         type: ''
       },
       filterErrorsOn: false,
+      filterUnusedTransOn: false,
       langCode: null,
       sidePanelOpen: false,
       confirmSaveOpen: false,
@@ -21640,6 +21641,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   methods: {
     filterErrors: _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__.filterErrors,
+    filterUnusedTrans: _phpTranslationManager_filters_js__WEBPACK_IMPORTED_MODULE_0__.filterUnusedTrans,
     translate: function translate() {
       var _this = this;
       var selectedTrans = this.getTrans('selected');
@@ -21820,10 +21822,21 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         langCode: this.langCode
       }).then(function (response) {
         var langCode = Object.keys(response.data.searchResults)[0];
-        _this2.searchResults[langCode] = _this2.searchResultsAddMeta(response.data.searchResults[langCode]);
+        var trans = response.data.searchResults[langCode];
+        _this2.searchResults[langCode] = _this2.searchResultsAddMeta(trans['foundTrans']);
+        console.debug(Object.keys(trans['unused'])); //mmmyyy
+        _this2.setMetaOriginalKeys(Object.keys(trans['unused']), langCode);
       })["catch"](function (error) {
         console.log(error);
       });
+    },
+    setMetaOriginalKeys: function setMetaOriginalKeys(originalKeys, langCode) {
+      for (var key in this.transFilesContents[langCode]) {
+        var meta = this.transFilesContents[this.langCode][key].meta;
+        if (originalKeys.indexOf(meta.orginalKey) > -1) {
+          meta.unused = true;
+        }
+      }
     },
     searchResultsAddMeta: function searchResultsAddMeta(searchResults) {
       var searchResultsWithMeta = {};
@@ -22389,7 +22402,7 @@ var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 var _hoisted_18 = [_hoisted_17];
 var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "app-tooltip"
-}, "Filter Errors", -1 /* HOISTED */);
+}, "Filter unused trans", -1 /* HOISTED */);
 var _hoisted_20 = {
   "class": "app-btn"
 };
@@ -22536,10 +22549,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }, "Search for \"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(langCode) + "\"", 1 /* TEXT */)], 2 /* CLASS */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [$options.unusedTrans.length !== 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: 0,
       onClick: _cache[2] || (_cache[2] = function () {
-        return _ctx.filterUnusedTrans && _ctx.filterUnusedTrans.apply(_ctx, arguments);
+        return $options.filterUnusedTrans && $options.filterUnusedTrans.apply($options, arguments);
       }),
       "class": "btn-icon"
-    }, [].concat(_hoisted_18))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_19]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [_hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    }, [].concat(_hoisted_18))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_19]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <div class=\"app-btn\">\n                                <div @click=\"filterErrors\" class=\"error btn-icon red\"\n                                    v-if=\"duplicateKeyRecords.length !== 0 || filterErrorsOn\">\n                                    <span :class=\"{ 'text-success': duplicateKeyRecords.length === 0 }\">\n                                        &#9888;\n                                    </span>\n                                </div>\n                                <div class=\"app-tooltip\">Filter Errors</div>\n                            </div> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [_hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       onClick: _cache[3] || (_cache[3] = function ($event) {
         $options.confirmClose($event, true);
         $data.confirmTranslateOpen = !$data.confirmTranslateOpen;
@@ -22883,7 +22896,8 @@ window.axios = axios__WEBPACK_IMPORTED_MODULE_1__["default"];
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   filterErrors: () => (/* binding */ filterErrors)
+/* harmony export */   filterErrors: () => (/* binding */ filterErrors),
+/* harmony export */   filterUnusedTrans: () => (/* binding */ filterUnusedTrans)
 /* harmony export */ });
 function filterErrors() {
   this.filterErrorsOn = !this.filterErrorsOn;
@@ -22894,6 +22908,13 @@ function filterErrors() {
     } else {
       trans[key].meta.visible = !!trans[key].meta.error;
     }
+  }
+}
+function filterUnusedTrans() {
+  this.filterUnusedTransOn = !this.filterUnusedTransOn;
+  var trans = this.transFilesContents[this.langCode];
+  for (var key in trans) {
+    trans[key].meta.visible = this.filterUnusedTransOn ? trans[key].meta.unused : true;
   }
 }
 

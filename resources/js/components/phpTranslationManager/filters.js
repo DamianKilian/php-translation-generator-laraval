@@ -9,3 +9,13 @@ export function filterErrors() {
         }
     }
 }
+
+export function filterUnusedTrans() {
+    this.filterUnusedTransOn = !this.filterUnusedTransOn;
+    const trans = this.transFilesContents[this.langCode];
+    for (const key in trans) {
+        trans[key].meta.visible = this.filterUnusedTransOn
+            ? trans[key].meta.unused
+            : true;
+    }
+}

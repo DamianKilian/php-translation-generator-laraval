@@ -62,7 +62,7 @@
                                         <path d="M14 3v5h5M9.9 17.1L14 13M9.9 12.9L14 17" />
                                     </svg>
                                 </div>
-                                <div class="app-tooltip">Filter Errors</div>
+                                <div class="app-tooltip">Filter unused trans</div>
                             </div>
                             <div class="app-btn">
                                 <div class="app-tooltip">Translate</div>
@@ -171,7 +171,7 @@
 </template>
 
 <script>
-import { filterErrors } from './phpTranslationManager/filters.js'
+import { filterErrors, filterUnusedTrans } from './phpTranslationManager/filters.js'
 import Modal from './Modal.vue'
 import TransTextareas from './TransTextareas.vue'
 
@@ -199,6 +199,7 @@ export default {
                 type: '',
             },
             filterErrorsOn: false,
+            filterUnusedTransOn: false,
             langCode: null,
             sidePanelOpen: false,
             confirmSaveOpen: false,
@@ -221,6 +222,7 @@ export default {
     },
     methods: {
         filterErrors,
+        filterUnusedTrans,
         translate: function () {
             var selectedTrans = this.getTrans('selected');
             this.numOfStrToTranslate = selectedTrans.length;
@@ -384,10 +386,20 @@ export default {
                 .post(this.searchUrl, { langCode: this.langCode })
                 .then((response) => {
                     var langCode = Object.keys(response.data.searchResults)[0];
-                    this.searchResults[langCode] = this.searchResultsAddMeta(response.data.searchResults[langCode]);
+                    var trans = response.data.searchResults[langCode];
+                    this.searchResults[langCode] = this.searchResultsAddMeta(trans['foundTrans']);
+                    this.setMetaOriginalKeys(Object.keys(trans['unused']), langCode);
                 }).catch((error) => {
                     console.log(error);
                 });
+        },
+        setMetaOriginalKeys: function (originalKeys, langCode) {
+            for (const key in this.transFilesContents[langCode]) {
+                var meta = this.transFilesContents[this.langCode][key].meta;
+                if (originalKeys.indexOf(meta.orginalKey) > -1) {
+                    meta.unused = true;
+                }
+            }
         },
         searchResultsAddMeta: function (searchResults) {
             var searchResultsWithMeta = {};

@@ -29,6 +29,7 @@ class PhpTranslationManagerService
     public function search($langCode)
     {
         $transFilesContents = $this->getTransFilesContents(false, $langCode)[$langCode];
+        $unused = $transFilesContents;
         $foundTrans = [];
         foreach ($this->searchLocations as $relativePath => $location) {
             foreach ($location['file_extensions'] as $ext) {
@@ -46,12 +47,19 @@ class PhpTranslationManagerService
                             (!array_key_exists($relativePath, $foundTrans) || false === array_search($trans, $foundTrans[$relativePath]))
                         ) {
                             $foundTrans[$relativePath][] = $trans;
+                        } else {
+                            unset($unused[$trans]);
                         }
                     }
                 }
             }
         }
-        return [$langCode => $foundTrans];
+        return [
+            $langCode => [
+                'foundTrans' => $foundTrans,
+                'unused' => $unused,
+            ]
+        ];
     }
 
     /**
