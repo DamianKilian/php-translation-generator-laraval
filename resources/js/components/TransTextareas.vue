@@ -3,20 +3,23 @@
         <div v-for="(val, arrkey) in transFileContent" class="row"
             :class="{ 'd-none': !val.meta.visible, 'bg-primary': val.meta.new, 'bg-danger': val.meta.deleted }"
             :key="val.meta.orginalKey">
-            <div class="col p-2"
+            <div class="col p-2 val-part"
                 :class="{ 'bg-warning': val.meta.modified.key, 'border border-danger bg-white border-3': '' !== val.meta.error }">
-                <b v-if="'' !== val.meta.error" class="text-danger trans-info"><span
-                        class="icon icon-html-entity">&#9888;</span>{{ val.meta.error
-                    }}</b>
-                <b v-if="val.meta.unused" class="text-secondary trans-info">
-                    <span class="icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="#9b9b9b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-                            <path d="M14 3v5h5M9.9 17.1L14 13M9.9 12.9L14 17" />
-                        </svg>
-                    </span>Unused
-                </b>
+                <div class="trans-info-container">
+                    <b v-if="'' !== val.meta.error" class="text-danger trans-info"><span
+                            class="icon icon-html-entity">&#9888;</span>{{ val.meta.error
+                        }}</b>
+                    <b v-if="val.meta.unused" class="text-secondary trans-info">
+                        <span class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="#9b9b9b" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                                <path d="M14 3v5h5M9.9 17.1L14 13M9.9 12.9L14 17" />
+                            </svg>
+                        </span>Unused
+                    </b>
+                </div>
                 <div class="trans">
                     <div class="actions">
                         <input @change="selectAction($event, arrkey)" v-model="val['meta'].selected"
@@ -87,7 +90,8 @@ export default {
             var key = Math.max(arrkey, lastTransSelectedArrkey) + 1;
             while (key !== lowerKey) {
                 key--;
-                this.transFilesContents[this.langCode][key].meta.selected = true;
+                var meta = this.transFilesContents[this.langCode][key].meta;
+                meta.selected = meta.visible ? true : false;
             }
         },
         resetTrans: function (e, arrkey) {

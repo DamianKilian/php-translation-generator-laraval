@@ -1,3 +1,11 @@
+.val-part {
+    position: relative;
+}
+.trans-info-container {
+    position: absolute;
+    right: 20px;
+    bottom: 10px;
+}
 .trans-info {
     .icon {
         font-size: 27px;
@@ -5,7 +13,7 @@
         line-height: 0;
         margin-left: 5px;
     }
-    .icon-html-entity{
+    .icon-html-entity {
         top: 3px;
         top: 4px;
         position: relative;

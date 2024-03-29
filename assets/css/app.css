@@ -12163,6 +12163,16 @@ textarea.form-control-lg {
   left: 0;
 }
 
+.val-part {
+  position: relative;
+}
+
+.trans-info-container {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+}
+
 .trans-info .icon {
   font-size: 27px;
   display: inline-block;
