@@ -21825,17 +21825,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         var langCode = Object.keys(response.data.searchResults)[0];
         var trans = response.data.searchResults[langCode];
         _this2.searchResults[langCode] = _this2.searchResultsAddMeta(trans['foundTrans']);
-        _this2.setMetaOriginalKeys(Object.keys(trans['unused']), langCode);
+        _this2.setUnused(Object.keys(trans['unused']), langCode);
       })["catch"](function (error) {
         console.log(error);
       });
     },
-    setMetaOriginalKeys: function setMetaOriginalKeys(originalKeys, langCode) {
+    setUnused: function setUnused(UnusedOriginalKeys, langCode) {
       for (var key in this.transFilesContents[langCode]) {
         var meta = this.transFilesContents[this.langCode][key].meta;
-        if (originalKeys.indexOf(meta.orginalKey) > -1) {
-          meta.unused = true;
-        }
+        meta.unused = UnusedOriginalKeys.indexOf(meta.orginalKey) > -1;
       }
     },
     searchResultsAddMeta: function searchResultsAddMeta(searchResults) {

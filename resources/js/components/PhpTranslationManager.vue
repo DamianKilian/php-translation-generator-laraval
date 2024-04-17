@@ -389,17 +389,15 @@ export default {
                     var langCode = Object.keys(response.data.searchResults)[0];
                     var trans = response.data.searchResults[langCode];
                     this.searchResults[langCode] = this.searchResultsAddMeta(trans['foundTrans']);
-                    this.setMetaOriginalKeys(Object.keys(trans['unused']), langCode);
+                    this.setUnused(Object.keys(trans['unused']), langCode);
                 }).catch((error) => {
                     console.log(error);
                 });
         },
-        setMetaOriginalKeys: function (originalKeys, langCode) {
+        setUnused: function (UnusedOriginalKeys, langCode) {
             for (const key in this.transFilesContents[langCode]) {
                 var meta = this.transFilesContents[this.langCode][key].meta;
-                if (originalKeys.indexOf(meta.orginalKey) > -1) {
-                    meta.unused = true;
-                }
+                meta.unused = UnusedOriginalKeys.indexOf(meta.orginalKey) > -1;
             }
         },
         searchResultsAddMeta: function (searchResults) {
