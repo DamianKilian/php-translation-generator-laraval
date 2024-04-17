@@ -61,6 +61,7 @@
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
                                         <path d="M14 3v5h5M9.9 17.1L14 13M9.9 12.9L14 17" />
                                     </svg>
+                                    <div class="numOnBtn" style="top: 4px;">{{ unusedTrans.length }}</div>
                                 </div>
                                 <div class="app-tooltip">Filter unused trans</div>
                             </div>
@@ -140,7 +141,7 @@
                                         &#8635;
                                     </span>
                                     <div class="numOnBtn">({{ historyKeysGlobal[this.langCode].historyLastKeyGlobal -
-        historyKeysGlobal[this.langCode].historyCurrKeyGlobal }})</div>
+                                        historyKeysGlobal[this.langCode].historyCurrKeyGlobal }})</div>
                                 </div>
                                 <div class="app-tooltip">Forth</div>
                             </div>
@@ -166,7 +167,7 @@
         <Modal v-if="modalMsg.msg || modalSearchOpen || numOfStrToTranslate" :searchResults="searchResults"
             :modalSearchOpen="modalSearchOpen" :closeModal="closeModal" :getTransFilesContents="getTransFilesContents"
             :modalMsg="modalMsg" :langCode="langCode" :getKeys="getKeys" :transFilesContents="transFilesContents"
-            :numOfStrToTranslate="numOfStrToTranslate" />
+            :numOfStrToTranslate="numOfStrToTranslate" :unusedTrans="unusedTrans" />
     </div>
 </template>
 
